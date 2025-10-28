@@ -133,7 +133,7 @@ They must then be adjusted to match your setup – see [Central Configuration & 
 
 ## 🧾 Configuration
 
-All site and system parameters for the G4KLX mdodules are stored in the following configuration files:
+All site and system parameters for the G4KLX modules are stored in the following configuration files:
 
 ```
 /etc/MMDVMHost.ini
@@ -227,13 +227,13 @@ Completely static – no PHP framework required, just a small `api.php` for JSON
 
 ## 🧱 System Setup & Maintenance
 
-- Database runs via Unix socket (`bind-address=127.0.0.1`)  
+- Database runs via Unix socket  
 - Installation scripts automatically create users and permissions  
-- No sensitive data in the repo (`site.conf` is in `.gitignore`)  
 
 ---
 
 ## 🎯 Credits & License
 
 - Jonathan Naylor G4KLX, for his outstanding DV implementations that form the foundation of this project  
-- This software is licensed under **GPL v2** and is primarily intended for amateur radio and educational use.
+- This software is licensed under **GPL v2** and is primarily intended for amateur radio and educational use. This project includes components from G4KLX licensed under GPL v2.
+Therefore, the combined work remains under GPL v2.
