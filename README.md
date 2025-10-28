@@ -17,7 +17,7 @@ The **entire installation** is automated through **four shell scripts** that cor
 Additionally, the project includes a **logfile parser** that reads all operational data from MMDVM, YSF, and DMR logs and writes them into a **MariaDB database**.  
 These data serve as the backend for a modern **web dashboard** that displays the repeater or hotspot status in real time.
 
-This project was originally developed for the MMDVM Repeater Builder Board used in the DB0SL Multimode Repeater. For other hardware or use cases, adjust the configuration files as needed.
+This project was originally developed for the MMDVM Repeater Builder Board used in the DB0SL Multimode Repeater. For other hardware or use cases, adjust the configuration files as needed (see the [Modem] section in MMDVMHost.ini)
 
 ---
 
