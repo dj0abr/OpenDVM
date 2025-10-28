@@ -1,0 +1,14 @@
+[Unit]
+Description=MMDVM Status Service
+After=network.target
+
+[Service]
+Type=simple
+User=mmdvm
+Group=mmdvm
+WorkingDirectory=/home/multimode/gui
+ExecStart=/home/multimode/gui/mmdvm-status /var/log/mmdvm
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

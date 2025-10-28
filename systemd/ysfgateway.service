@@ -1,0 +1,16 @@
+[Unit]
+Description=YSFGateway
+After=network-online.target mmdvmhost.service
+Wants=network-online.target
+
+[Service]
+User=mmdvm
+Group=mmdvm
+ExecStart=/usr/local/bin/YSFGateway /etc/ysfgateway
+Restart=on-failure
+RestartSec=2
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

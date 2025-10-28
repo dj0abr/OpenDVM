@@ -1,0 +1,11 @@
+/var/log/ircddbgateway/*.log {
+    daily
+    rotate 7
+    compress
+    missingok
+    notifempty
+    create 644 mmdvm mmdvm
+    postrotate
+        systemctl kill -s HUP ircddbgateway.service >/dev/null 2>&1 || true
+    endscript
+}

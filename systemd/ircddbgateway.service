@@ -1,0 +1,24 @@
+[Unit]
+Description=ircDDBGateway
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mmdvm
+Group=mmdvm
+
+# Arbeitsverzeichnis für Logs
+WorkingDirectory=/var/log/ircddbgateway
+
+# sicherstellen, dass es existiert und dem User gehört
+ExecStartPre=/bin/rm -f /tmp/ircDDB_Gateway
+
+# Daemon im Vordergrund laufen lassen (damit systemd ihn steuern kann)
+ExecStart=/usr/local/bin/ircddbgatewayd -logdir /var/log/ircddbgateway -foreground
+
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

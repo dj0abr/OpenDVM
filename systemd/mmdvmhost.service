@@ -1,0 +1,13 @@
+[Unit]
+Description=MMDVMHost
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=mmdvm
+Group=mmdvm
+ExecStart=/usr/local/bin/MMDVMHost /etc/MMDVMHost.ini
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
