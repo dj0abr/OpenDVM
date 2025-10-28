@@ -121,12 +121,20 @@ cd gui
 cd ..
 [ -f gui/mmdvm-status.service ] || { echo "Error: gui/mmdvm-status.service is missing"; exit 1; }
 install -m 644 gui/mmdvm-status.service /etc/systemd/system/mmdvm-status.service
+
+SQL_COMMANDS="
+DROP USER IF EXISTS 'mmdvm'@'localhost';
+CREATE DATABASE IF NOT EXISTS mmdvmdb CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+CREATE USER 'mmdvm'@'localhost' IDENTIFIED BY 'db0slrelais';
+GRANT ALL PRIVILEGES ON mmdvmdb.* TO 'mmdvm'@'localhost';
+FLUSH PRIVILEGES;
+"
+
+
 SQL_COMMANDS="
 -- Datenbank anlegen, falls noch nicht vorhanden
 CREATE DATABASE IF NOT EXISTS mmdvmdb
-  CHARACTER SET utf8mb4wget https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@1.3.0/dist/chartjs-chart-matrix.min.js
-
-  COLLATE utf8mb4_general_ci;
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 -- C++-Dienst (läuft als Linux-User mmdvm)
 CREATE USER IF NOT EXISTS 'mmdvm'@'localhost' IDENTIFIED VIA unix_socket;
 GRANT ALL PRIVILEGES ON mmdvmdb.* TO 'mmdvm'@'localhost';
