@@ -1,4 +1,4 @@
-# 🛰️ MMDVM MultiMode Repeater for Debian/Linux
+# 🛰️ OpenDVM MultiMode Repeater for Debian/Linux
 
 This project builds upon the **Digital Voice (DV) modules by G4KLX**, which are combined into a complete solution like **Pi-Star**.  
 However, Pi-Star is designed **exclusively for the Raspberry Pi**.
