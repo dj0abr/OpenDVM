@@ -27,12 +27,10 @@ This project was originally developed for the MMDVM Repeater Builder Board used 
 2. [Architecture](#-architecture)  
 3. [Backend – Log Monitor & Database](#-backend--log-monitor--database)  
 4. [Installation & Dependencies](#-installation--dependencies)  
-5. [Database & Security](#-database--security)  
-6. [Central Configuration & Config Renderer](#-central-configuration--config-renderer)  
-7. [Web Frontend](#-web-frontend)  
-8. [System Setup & Maintenance](#-system-setup--maintenance)  
-9. [Build System](#-build-system)  
-10. [Project Goal](#-project-goal)
+5. [Configuration](#-configuration)  
+6. [Web Frontend](#-web-frontend)  
+7. [System Setup & Maintenance](#-system-setup--maintenance)  
+8. [Credits & License](#-credits--license)
 
 ---
 
