@@ -188,6 +188,37 @@ a.lh-cs:hover {
   outline-offset: 2px;
   text-decoration: none;
 }
+/* Nur die D-Star-Zeile als Grid */
+.refl-item--grid{
+  display: grid;
+  grid-template-columns: auto 1fr; /* Label | Wert */
+  column-gap: 10px;
+  align-items: baseline;
+}
+
+/* Gelbe Zusatzzeile unter beiden Spalten */
+.refl-item--grid .dtmf-note {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  color: #ffcf40;
+  margin-top: 1px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+/* D-Star-Zeile als 2-Spalten-Grid */
+.refl-item--grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  align-items: baseline;
+}
+
+/* rechter Text (Reflectorname) nach rechts */
+.refl-item--grid .v {
+  justify-self: end;
+  text-align: right;
+}
+
+
 
   </style>
 <!-- Chart.js -->
@@ -227,7 +258,11 @@ a.lh-cs:hover {
     <section id="reflectorTile" class="tile">
       <h2>Reflector</h2>
       <div id="reflectorList">
-        <div class="refl-item"><span class="k">D-Star:</span><span id="refl-dstar" class="v">----</span></div>
+        <div class="refl-item refl-item--grid">
+          <a id="refl-dstar-link" class="k" href="http://xreflector.net/" target="_blank" rel="noopener noreferrer">D-Star:</a>
+          <span id="refl-dstar" class="v">----</span>
+          <div id="dtmf-indicator" class="dtmf-note">DTMF active</div>
+        </div>
         <div class="refl-item"><span class="k">DMR:</span><span id="refl-dmr" class="v">----</span></div>
         <div class="refl-item"><span class="k">Fusion:</span><span id="refl-fusion" class="v">----</span></div>
       </div>
@@ -628,6 +663,13 @@ a.lh-cs:hover {
     }catch(e){ console.error(e); }
   }
 
+  function dcsUrlFromText(t) {
+    const s = String(t || '').toUpperCase();
+    // match "DCS001", "DCS 001", optional nachfolgender Buchstabe/Leerzeichen egal
+    const m = s.match(/\bDCS\s*?(\d{3})\b/);
+    return m ? `https://dcs${m[1]}.xreflector.net/#` : 'http://xreflector.net/';
+  }
+
   function renderReflector(d) {
     const modes = ['dstar', 'dmr', 'fusion'];
     for (const m of modes) {
@@ -639,6 +681,12 @@ a.lh-cs:hover {
         el.classList.add('refl-inactive');
       } else {
         el.classList.add('refl-active');
+      }
+
+      // nur für D-Star: Link dynamisch setzen
+      if (m === 'dstar') {
+        const link = document.getElementById('refl-dstar-link');
+        if (link) link.href = dcsUrlFromText(val);
       }
     }
   }
