@@ -1,913 +1,1566 @@
 <!doctype html>
 <html lang="de">
-<head>
-  <meta charset="utf-8" />
-  <title>DB0SL Multimode Relais</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-store, must-revalidate" />
-  <style>
-    :root{
-      --bg:#0b0c10; --fg:#eaf0f1; --muted:#9aa3a7; --border:#1a1f24;
-      --tile:#222831; --tile-alt:#1d232c; --ok:#28a745; --neutral:#12161a;
-      --active-bg:#b00020; --active-border:#e5484d; --active-fg:#fff3f3;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; color:var(--fg);
-      background:linear-gradient(180deg,#0b0c10,#0f1419 260px);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Open Sans","Helvetica Neue",Arial,sans-serif
-   }
-header {
-  position: sticky;
-  top: 0;
-  backdrop-filter: blur(8px);
-  background: #0006;
-  border-bottom: 1px solid var(--border);
-  padding: 18px 20px;
-  display: flex;
-  justify-content: center; /* sorgt für Zentrierung des inneren div */
-  align-items: center;
-  flex-direction: column; /* neu: damit die Zeilen untereinander stehen */
-  text-align: center; /* optional, falls du Text zentriert willst */
-}
+  <head>
+    <meta charset="utf-8" />
+    <title>DB0SL Multimode Relais</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store, must-revalidate" />
+    <style>
+      :root {
+        --bg: #0b0c10;
+        --fg: #eaf0f1;
+        --muted: #9aa3a7;
+        --border: #1a1f24;
+        --tile: #222831;
+        --tile-alt: #1d232c;
+        --ok: #28a745;
+        --neutral: #12161a;
+        --active-bg: #b00020;
+        --active-border: #e5484d;
+        --active-fg: #fff3f3;
+      }
 
-header h1 {
-  margin: 0;
-  font-size: 28px;
-  letter-spacing: .2px;
-  text-align: center; /* sorgt für zentrierten Titel */
-}
+      * {
+        box-sizing: border-box;
+      }
 
-    h1{margin:0; font-size:28px; letter-spacing:.2px}
-    main{max-width:980px; margin:0 auto; padding:20px}
-    .grid{display:grid; gap:16px; grid-template-columns: 1fr 2fr; grid-auto-rows:minmax(80px,auto)}
-    @media (max-width:740px){ .grid{ grid-template-columns:1fr } }
-    .tile{
-      background:var(--tile); border:1px solid var(--border);
-      border-radius:16px; padding:16px 18px; box-shadow:0 1px 0 #0004 inset
-    }
-    .tile h2{margin:0 0 8px 0; font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--muted)}
-    .big{font-size:42px; font-weight:800; line-height:1.1; letter-spacing:.5px; word-break:break-word}
-    .big.mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;}
+      body {
+        margin: 0;
+        color: var(--fg);
+        background: linear-gradient(180deg, #0b0c10, #0f1419 260px);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Open Sans",
+          "Helvetica Neue", Arial, sans-serif;
+      }
 
-    /* Callsign-Active: markantes Rot */
-    .callsign-tile{ transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
-    .callsign-active{ background: var(--active-bg); border-color: var(--active-border); }
-    .callsign-active .big{ color: var(--active-fg); text-shadow: 0 1px 0 #0006; }
+      header {
+        position: sticky;
+        top: 0;
+        backdrop-filter: blur(8px);
+        background: #0006;
+        border-bottom: 1px solid var(--border);
+        padding: 18px 20px;
+        display: flex;
+        justify-content: center; /* sorgt für Zentrierung des inneren div */
+        align-items: center;
+        flex-direction: column; /* neu: damit die Zeilen untereinander stehen */
+        text-align: center; /* optional, falls du Text zentriert willst */
+      }
 
-    /* Mode: dynamischer Hintergrund per Klasse */
-    .mode-tile{ transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
-    .mode-idle   { background: var(--tile);            border-color: var(--border); }
-    .mode-dstar  { background: #0a2b4a;                border-color: #114c80; } /* blau */
-    .mode-ysf    { background: #4a3a0a;                border-color: #806511; } /* gelblich-braun */
-    .mode-dmr    { background: #143a1a;                border-color: #226b30; } /* grün */
-    .mode-p25    { background: #3a103a;                border-color: #651f65; } /* violett */
-    .mode-nxdn   { background: #2e2e2e;                border-color: #505050; } /* grau */
-    .mode-fm     { background: #2a1a0a;                border-color: #503012; } /* braun */
-    .mode-dpmr   { background: #1d2c3a;                border-color: #2f4f68; } /* stahlblau */
+      header h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 0.2px;
+        text-align: center; /* sorgt für zentrierten Titel */
+      }
 
-    .badge{display:inline-block; border:1px solid var(--border); border-radius:999px; padding:2px 8px; font-size:12px; color:var(--muted); background:var(--tile-alt)}
-    .dot{width:10px; height:10px; border-radius:50%; background:#555; display:inline-block; margin-right:8px; vertical-align:middle}
-    .on{background:var(--ok)}
+      h1 {
+        margin: 0;
+        font-size: 28px;
+        letter-spacing: 0.2px;
+      }
 
-    /* Key-Value-Grid für Status */
-    .kv-grid{display:grid; grid-template-columns: 1fr 1fr; gap:12px 16px}
-    @media (max-width:740px){ .kv-grid{ grid-template-columns:1fr } }
-    .kv{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px dashed #1f2327}
-    .kv:last-child{border-bottom:0}
-    .k{color:var(--muted); font-weight:600; font-size:14px}
-    .v{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:15px}
-    .meta{display:flex; justify-content:space-between; align-items:center; margin-top:10px}
+      main {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 20px;
+      }
 
-    /* Last-Heard Liste */
-    .lh-list{list-style:none; padding:0; margin:0}
-    .lh-item{display:grid; grid-template-columns: 1.3fr 1.2fr 1.5fr 1fr; gap:10px; align-items:center; padding:8px 0; border-bottom:1px dashed #1f2327}
-    .lh-item:last-child{border-bottom:0}
-    .lh-cs{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-weight:700}
-    .lh-time{color:var(--muted); font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;}
-    .lh-mode{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;}
-    .lh-num{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; text-align:right}
+      .grid {
+        display: grid;
+        gap: 16px;
+        grid-template-columns: 1fr 2fr;
+        grid-auto-rows: minmax(80px, auto);
+      }
 
-    /* Chart Kachel */
-    .chart-wrap{position:relative; height:280px; width:100%}
-    footer{text-align:center; color:var(--muted); font-size:12px; padding:14px}
+      @media (max-width: 740px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    .callsign-box { display:flex; align-items:center; gap:12px; }
-    .flag { display:none; height:42px; border-radius:4px; box-shadow:0 0 3px #0006; }
-    .callsign-active .flag { filter: brightness(1.1); }
-    /* Source-Badge in Last-Heard */
-    .src-badge{
-      display:inline-block; margin-left:8px; padding:1px 6px;
-      border-radius:999px; font-size:11px; line-height:1.4;
-      border:1px solid var(--border); background:var(--tile-alt); color:var(--muted);
-    }
-    .src-rf{
-      background: rgba(46,166,255,.15);
-      border-color: #2EA6FF;
-      color: #d9efff;
-    }
+      .tile {
+        background: var(--tile);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px 18px;
+        box-shadow: 0 1px 0 #0004 inset;
+      }
 
-    .src-net { background:#2a1517; border-color:#6e2a2e; color:#ffd9dd; }
+      .tile h2 {
+        margin: 0 0 8px 0;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+      }
 
-    /* Reflector-Kachel */
-    #reflectorList {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 6px;
-    }
+      .big {
+        font-size: 42px;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: 0.5px;
+        word-break: break-word;
+      }
 
-    .refl-item {
-      display: flex;
-      justify-content: space-between;
-      border-bottom: 1px dashed #1f2327;
-      padding: 6px 0;
-    }
+      .big.mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+      }
 
-    .refl-item:last-child {
-      border-bottom: 0;
-    }
+      /* Callsign-Active: markantes Rot */
+      .callsign-tile {
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      }
 
-    .refl-item .k {
-      color: var(--muted);
-      font-weight: 600;
-    }
-    .refl-item .v {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    }
-    #reflectorTile .refl-item .k,
-    #reflectorTile .refl-item .v {
-      font-size: 18px;
-      line-height: 1.3;
-    }
-  /* Reflector Statusfarben */
-  .refl-item .v {
-    transition: color .2s ease, text-shadow .2s ease;
-  }
+      .callsign-active {
+        background: var(--active-bg);
+        border-color: var(--active-border);
+      }
 
-  .refl-active {
-    color: #5cff89; /* hellgrün */
-    text-shadow: 0 0 6px #5cff89aa;
-  }
+      .callsign-active .big {
+        color: var(--active-fg);
+        text-shadow: 0 1px 0 #0006;
+      }
 
-  .refl-inactive {
-    color: #888;
-  }
-.subline {
-  font-size: 14px;
-  color: var(--muted);
-  margin-top: 4px;
-  letter-spacing: 0.3px;
-  text-align: center; /* sorgt für zentrierten Text unabhängig vom h1 */
-  line-height: 1.4;
-}
-a.lh-cs { 
-  color: inherit; 
-  text-decoration: none; 
-}
-a.lh-cs:hover {
-  text-decoration: underline;
-}
-/* Callsign-Link soll wie normaler Text aussehen */
-#callsign,
-#callsign:visited,
-#callsign:hover,
-#callsign:active {
-  color: inherit;            /* übernimmt .big/.callsign-active Farbe */
-  text-decoration: none;     /* kein Unterstrich */
-}
+      /* Mode: dynamischer Hintergrund per Klasse */
+      .mode-tile {
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      }
 
-/* Wenn du beim Hover einen Hinweis willst, nur Unterstrich einschalten */
-#callsign:hover {
-  text-decoration: underline;
-}
+      .mode-idle {
+        background: var(--tile);
+        border-color: var(--border);
+      }
 
-/* Optional für Tastatur-Nutzer: dezente Fokus-Markierung */
-#callsign:focus-visible {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
-  text-decoration: none;
-}
-/* Nur die D-Star-Zeile als Grid */
-.refl-item--grid{
-  display: grid;
-  grid-template-columns: auto 1fr; /* Label | Wert */
-  column-gap: 10px;
-  align-items: baseline;
-}
+      .mode-dstar {
+        background: #0a2b4a;
+        border-color: #114c80;
+      } /* blau */
 
-/* Gelbe Zusatzzeile unter beiden Spalten */
-.refl-item--grid .dtmf-note {
-  grid-column: 1 / -1;
-  font-size: 12px;
-  color: #ffcf40;
-  margin-top: 1px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-}
-/* D-Star-Zeile als 2-Spalten-Grid */
-.refl-item--grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  column-gap: 10px;
-  align-items: baseline;
-}
+      .mode-ysf {
+        background: #4a3a0a;
+        border-color: #806511;
+      } /* gelblich-braun */
 
-/* rechter Text (Reflectorname) nach rechts */
-.refl-item--grid .v {
-  justify-self: end;
-  text-align: right;
-}
+      .mode-dmr {
+        background: #143a1a;
+        border-color: #226b30;
+      } /* grün */
 
+      .mode-p25 {
+        background: #3a103a;
+        border-color: #651f65;
+      } /* violett */
 
+      .mode-nxdn {
+        background: #2e2e2e;
+        border-color: #505050;
+      } /* grau */
 
-  </style>
-<!-- Chart.js -->
-<script src="js/chart.umd.min.js"></script>
+      .mode-fm {
+        background: #2a1a0a;
+        border-color: #503012;
+      } /* braun */
 
-<!-- Matrix-Plugin -->
-<script src="js/chartjs-chart-matrix.min.js"></script>
+      .mode-dpmr {
+        background: #1d2c3a;
+        border-color: #2f4f68;
+      } /* stahlblau */
 
-</head>
-<body>
-<header>
-  <div>
-    <h1>DB0SL Multimode Relais</h1>
-    <div class="subline"><b>OpenDVM</b> by DJ0ABR (DV modules by G4KLX) TX: 439.450 MHz &nbsp;&nbsp; RX: 431.850 MHz &nbsp;&nbsp; D-Star, YSF, DMR &nbsp;&nbsp; </div>
-  </div>
-</header>
+      .badge {
+        display: inline-block;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+        color: var(--muted);
+        background: var(--tile-alt);
+      }
 
-<main>
-  <div class="grid">
-    <!-- Mode -->
-    <section id="modeTile" class="tile mode-tile mode-idle">
-      <h2>Mode</h2>
-      <div id="mode" class="big mono">Idle</div>
-    </section>
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #555;
+        display: inline-block;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
 
-<!-- Callsign -->
-<section id="callsignTile" class="tile callsign-tile">
-  <h2>Callsign <span id="rxBadge" class="badge">inactive</span></h2>
-  <div class="callsign-box">
-    <img id="flag" class="flag" alt="" />
-    <a id="callsign" class="big mono" href="#" target="_blank" rel="noopener noreferrer">–</a>
-  </div>
-</section>
+      .on {
+        background: var(--ok);
+      }
 
+      /* Key-Value-Grid für Status */
+      .kv-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px 16px;
+      }
 
-    <!-- Reflector -->
-    <section id="reflectorTile" class="tile">
-      <h2>Reflector</h2>
-      <div id="reflectorList">
-        <div class="refl-item refl-item--grid">
-          <a id="refl-dstar-link" class="k" href="http://xreflector.net/" target="_blank" rel="noopener noreferrer">D-Star:</a>
-          <span id="refl-dstar" class="v">----</span>
-          <div id="dtmf-indicator" class="dtmf-note">DTMF active</div>
+      @media (max-width: 740px) {
+        .kv-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .kv {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px dashed #1f2327;
+      }
+
+      .kv:last-child {
+        border-bottom: 0;
+      }
+
+      .k {
+        color: var(--muted);
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .v {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+        font-size: 15px;
+      }
+
+      .meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      /* Last-Heard Liste */
+      .lh-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .lh-item {
+        display: grid;
+        grid-template-columns: 1.3fr 1.2fr 1.5fr 1fr;
+        gap: 10px;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px dashed #1f2327;
+      }
+
+      .lh-item:last-child {
+        border-bottom: 0;
+      }
+
+      .lh-cs {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+        font-weight: 700;
+      }
+
+      .lh-time {
+        color: var(--muted);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+      }
+
+      .lh-mode {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+      }
+
+      .lh-num {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+        text-align: right;
+      }
+
+      /* Chart Kachel */
+      .chart-wrap {
+        position: relative;
+        height: 280px;
+        width: 100%;
+      }
+
+      footer {
+        text-align: center;
+        color: var(--muted);
+        font-size: 12px;
+        padding: 14px;
+      }
+
+      .callsign-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .flag {
+        display: none;
+        height: 42px;
+        border-radius: 4px;
+        box-shadow: 0 0 3px #0006;
+      }
+
+      .callsign-active .flag {
+        filter: brightness(1.1);
+      }
+
+      /* Source-Badge in Last-Heard */
+      .src-badge {
+        display: inline-block;
+        margin-left: 8px;
+        padding: 1px 6px;
+        border-radius: 999px;
+        font-size: 11px;
+        line-height: 1.4;
+        border: 1px solid var(--border);
+        background: var(--tile-alt);
+        color: var(--muted);
+      }
+
+      .src-rf {
+        background: rgba(46, 166, 255, 0.15);
+        border-color: #2ea6ff;
+        color: #d9efff;
+      }
+
+      .src-net {
+        background: #2a1517;
+        border-color: #6e2a2e;
+        color: #ffd9dd;
+      }
+
+      /* Reflector-Kachel */
+      #reflectorList {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 6px;
+      }
+
+      .refl-item {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px dashed #1f2327;
+        padding: 6px 0;
+      }
+
+      .refl-item:last-child {
+        border-bottom: 0;
+      }
+
+      .refl-item .k {
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .refl-item .v {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+      }
+
+      #reflectorTile .refl-item .k,
+      #reflectorTile .refl-item .v {
+        font-size: 18px;
+        line-height: 1.3;
+      }
+
+      /* Reflector Statusfarben */
+      .refl-item .v {
+        transition: color 0.2s ease, text-shadow 0.2s ease;
+      }
+
+      .refl-active {
+        color: #5cff89; /* hellgrün */
+        text-shadow: 0 0 6px #5cff89aa;
+      }
+
+      .refl-inactive {
+        color: #888;
+      }
+
+      .subline {
+        font-size: 14px;
+        color: var(--muted);
+        margin-top: 4px;
+        letter-spacing: 0.3px;
+        text-align: center; /* sorgt für zentrierten Text unabhängig vom h1 */
+        line-height: 1.4;
+      }
+
+      a.lh-cs {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      a.lh-cs:hover {
+        text-decoration: underline;
+      }
+
+      /* Callsign-Link soll wie normaler Text aussehen */
+      #callsign,
+      #callsign:visited,
+      #callsign:hover,
+      #callsign:active {
+        color: inherit; /* übernimmt .big/.callsign-active Farbe */
+        text-decoration: none; /* kein Unterstrich */
+      }
+
+      /* Wenn du beim Hover einen Hinweis willst, nur Unterstrich einschalten */
+      #callsign:hover {
+        text-decoration: underline;
+      }
+
+      /* Optional für Tastatur-Nutzer: dezente Fokus-Markierung */
+      #callsign:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+        text-decoration: none;
+      }
+
+      /* Nur die D-Star-Zeile als Grid */
+      .refl-item--grid {
+        display: grid;
+        grid-template-columns: auto 1fr; /* Label | Wert */
+        column-gap: 10px;
+        align-items: baseline;
+      }
+
+      /* Gelbe Zusatzzeile unter beiden Spalten */
+      .refl-item--grid .dtmf-note {
+        grid-column: 1 / -1;
+        font-size: 12px;
+        color: #ffcf40;
+        margin-top: 1px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          monospace;
+      }
+
+      /* D-Star-Zeile als 2-Spalten-Grid */
+      .refl-item--grid {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: 10px;
+        align-items: baseline;
+      }
+
+      /* rechter Text (Reflectorname) nach rechts */
+      .refl-item--grid .v {
+        justify-self: end;
+        text-align: right;
+      }
+    </style>
+
+    <!-- Chart.js -->
+    <script src="js/chart.umd.min.js"></script>
+
+    <!-- Matrix-Plugin -->
+    <script src="js/chartjs-chart-matrix.min.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <div>
+        <h1>DB0SL Multimode Relais</h1>
+        <div class="subline">
+          <b>OpenDVM</b> by DJ0ABR (DV modules by G4KLX) TX: 439.450 MHz &nbsp;&nbsp; RX:
+          431.850 MHz &nbsp;&nbsp; D-Star, YSF, DMR &nbsp;&nbsp;
+          <a
+            href="https://github.com/dj0abr/OpenDVM"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            https://github.com/dj0abr/OpenDVM
+          </a>
         </div>
-        <div class="refl-item"><span class="k">DMR:</span><span id="refl-dmr" class="v">----</span></div>
-        <div class="refl-item"><span class="k">Fusion:</span><span id="refl-fusion" class="v">----</span></div>
       </div>
-    </section>
+    </header>
 
-    <!-- Status -->
-    <section class="tile">
-      <h2>Status</h2>
-      <div class="kv-grid">
-        <div class="kv"><span class="k">BER (last TX)</span><span id="ber" class="v">–</span></div>
-        <div class="kv"><span class="k">Duration (last TX)</span><span id="dur" class="v">–</span></div>
-        <div class="kv"><span class="k">DG-ID</span><span id="dgid" class="v">–</span></div>
-        <div class="kv"><span class="k">Source</span><span id="source" class="v">–</span></div>
-        <div class="kv"><span class="k">RX</span><span class="v"><span id="activeDot" class="dot"></span><span id="activeText">inactive</span></span></div>
-        <div class="kv"><span class="k">last updated</span><span id="upd" class="v">–</span></div>
+    <main>
+      <div class="grid">
+        <!-- Mode -->
+        <section id="modeTile" class="tile mode-tile mode-idle">
+          <h2>Mode</h2>
+          <div id="mode" class="big mono">Idle</div>
+        </section>
+
+        <!-- Callsign -->
+        <section id="callsignTile" class="tile callsign-tile">
+          <h2>Callsign <span id="rxBadge" class="badge">inactive</span></h2>
+          <div class="callsign-box">
+            <img id="flag" class="flag" alt="" />
+            <a
+              id="callsign"
+              class="big mono"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              >–</a
+            >
+          </div>
+        </section>
+
+        <!-- Reflector -->
+        <section id="reflectorTile" class="tile">
+          <h2>Reflector</h2>
+          <div id="reflectorList">
+            <div class="refl-item refl-item--grid">
+              <a
+                id="refl-dstar-link"
+                class="k"
+                href="http://xreflector.net/"
+                target="_blank"
+                rel="noopener noreferrer"
+                >D-Star:</a
+              >
+              <span id="refl-dstar" class="v">----</span>
+              <div id="dtmf-indicator" class="dtmf-note">DTMF active</div>
+            </div>
+            <div class="refl-item">
+              <span class="k">DMR:</span><span id="refl-dmr" class="v">----</span>
+            </div>
+            <div class="refl-item">
+              <span class="k">Fusion:</span><span id="refl-fusion" class="v">----</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Status -->
+        <section class="tile">
+          <h2>Status</h2>
+          <div class="kv-grid">
+            <div class="kv">
+              <span class="k">BER (last TX)</span><span id="ber" class="v">–</span>
+            </div>
+            <div class="kv">
+              <span class="k">Duration (last TX)</span><span id="dur" class="v">–</span>
+            </div>
+            <div class="kv">
+              <span class="k">DG-ID</span><span id="dgid" class="v">–</span>
+            </div>
+            <div class="kv">
+              <span class="k">Source</span><span id="source" class="v">–</span>
+            </div>
+            <div class="kv">
+              <span class="k">RX</span
+              ><span class="v"
+                ><span id="activeDot" class="dot"></span
+                ><span id="activeText">inactive</span></span
+              >
+            </div>
+            <div class="kv">
+              <span class="k">last updated</span><span id="upd" class="v">–</span>
+            </div>
+          </div>
+          <div class="meta">
+            <span class="badge"></span>
+            <span id="age" class="badge">Age: –</span>
+          </div>
+        </section>
+
+        <!-- Last Heard -->
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Last Heard</h2>
+          <ul id="lhList" class="lh-list"></ul>
+        </section>
+
+        <!-- Hall of Fame -->
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Hall of Fame <span class="badge">last 30&nbsp;Days</span></h2>
+          <div class="chart-wrap">
+            <canvas id="hallOfFameChart"></canvas>
+          </div>
+          <ul id="hofList" class="lh-list" style="margin-top: 10px"></ul>
+        </section>
+
+        <!-- Aktivierungen 48h -->
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Activations per hour (48&nbsp;h) <span class="badge">RF vs NET</span></h2>
+          <div class="chart-wrap">
+            <canvas id="activityChart"></canvas>
+          </div>
+        </section>
+
+        <!-- Activity by Mode (48h) -->
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Activity by Mode (48&nbsp;h)</h2>
+          <div class="chart-wrap">
+            <canvas id="modeChart"></canvas>
+          </div>
+        </section>
+
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Activity by Mode (48&nbsp;h) &nbsp; <span class="badge">RF vs NET</span></h2>
+          <div class="chart-wrap">
+            <canvas id="modeSplitChart"></canvas>
+          </div>
+        </section>
+
+        <!-- Activity Heatmap -->
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Activity Heatmap (30&nbsp;d) <span class="badge">per day/hour</span></h2>
+          <div class="chart-wrap">
+            <canvas id="heatmapChart"></canvas>
+          </div>
+        </section>
+
+        <!-- ⬇︎ Durchschnittliche Sendedauer pro Mode -->
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Average transmission time per mode</h2>
+          <div class="chart-wrap">
+            <canvas id="avgDurationByModeChart"></canvas>
+          </div>
+        </section>
+
+        <!-- ⬇︎ Anzahl QSOs pro Callsign (Top 10) -->
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Number of Transmissions per callsign (Top 10)</h2>
+          <div class="chart-wrap">
+            <canvas id="callsignTop10CountChart"></canvas>
+          </div>
+        </section>
+
+        <!-- ⬇︎ Gesamtsendezeit pro Callsign (Top 10) -->
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Total transmission time per callsign (Top 10)</h2>
+          <div class="chart-wrap">
+            <canvas id="callsignTop10DurationChart"></canvas>
+          </div>
+        </section>
       </div>
-      <div class="meta">
-        <span class="badge"></span>
-        <span id="age" class="badge">Age: –</span>
-      </div>
-    </section>
+    </main>
 
+    <footer>
+      Live monitoring. Updated every second.<br />
+      Hardware: MMDVM Board<br />
+      System: Debian (ProxMox VM)<br />
+      Driver: G4KLX MMDVMHost and Gateways<br />
+      OpenDVM: Debian &amp; GUI Integration: DJ0ABR<br />
+      External links (e.g., to qrz.com, hamqth.com) open in a new window.<br />
+      When accessing these sites, the privacy policies of the respective operators apply.
+    </footer>
 
-    <!-- Last Heard -->
-    <section class="tile" style="grid-column: 1 / -1;">
-      <h2>Last Heard</h2>
-      <ul id="lhList" class="lh-list"></ul>
-    </section>
-
-    <!-- Aktivierungen 48h -->
-    <section class="tile" style="grid-column: 1 / -1;">
-    <h2>Activations per hour (48&nbsp;h) <span class="badge">RF vs NET</span></h2>
-      <div class="chart-wrap">
-        <canvas id="activityChart"></canvas>
-      </div>
-    </section>
-    <!-- Activity by Mode (48h) -->
-    <section class="tile" style="grid-column: 1 / -1;">
-      <h2>Activity by Mode (48&nbsp;h)</h2>
-      <div class="chart-wrap">
-        <canvas id="modeChart"></canvas>
-      </div>
-    </section>
-
-    <section class="tile" style="grid-column: 1 / -1;">
-      <h2>Activity by Mode (48&nbsp;h) &nbsp; <span class="badge">RF vs NET</span></h2>
-      <div class="chart-wrap">
-        <canvas id="modeSplitChart"></canvas>
-      </div>
-    </section>
-
-    <!-- Activity Heatmap -->
-    <section class="tile" style="grid-column: 1 / -1;">
-      <h2>Activity Heatmap (30&nbsp;d) <span class="badge">per day/hour</span></h2>
-      <div class="chart-wrap">
-        <canvas id="heatmapChart"></canvas>
-      </div>
-    </section>
-
-  </div>
-</main>
-
-<footer>
-  Live monitoring. Updated every second.<br>
-  Hardware: MMDVM Board<br>
-  System: Debian (ProxMox VM)<br>
-  Driver: G4KLX MMDVMHost and Gateways<br>
-  OpenDVM: Debian & GUI Integration: DJ0ABR<br>
-  External links (e.g., to qrz.com, hamqth.com) open in a new window.<br>
-  When accessing these sites, the privacy policies of the respective operators apply.
-</footer>
-
-
-<script>
-  function sanitizeCallsign(cs) {
-    return (cs || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
-  }
-  function linkQRZ(cs)    { const c = sanitizeCallsign(cs); return `https://www.qrz.com/db/${c}`; }
-  function linkHamQTH(cs) { const c = sanitizeCallsign(cs); return `https://www.hamqth.com/${c}`; }
-  function linkRadioID(cs){ const c = sanitizeCallsign(cs); return `https://www.radioid.net/search?query=${c}`; }
-
-  const els = {
-    mode: document.getElementById('mode'),
-    modeTile: document.getElementById('modeTile'),
-    callsign: document.getElementById('callsign'),
-    callsignTile: document.getElementById('callsignTile'),
-    rxBadge: document.getElementById('rxBadge'),
-    activeDot: document.getElementById('activeDot'),
-    activeText: document.getElementById('activeText'),
-    ber: document.getElementById('ber'),
-    dur: document.getElementById('dur'),
-    dgid: document.getElementById('dgid'),
-    source: document.getElementById('source'),
-    upd: document.getElementById('upd'),
-    age: document.getElementById('age'),
-    lhList: document.getElementById('lhList'),
-    flag: document.getElementById('flag'),
-  };
-
-  let lastUpdated = null;
-
-  function setModeClass(mode) {
-    const el = els.modeTile;
-    el.className = 'tile mode-tile'; // reset
-    const m = (mode || '').toLowerCase();
-    let cls = 'mode-idle';
-    if (m.includes('d-star')) cls = 'mode-dstar';
-    else if (m.includes('fusion') || m === 'ysf' || m.includes('system fusion')) cls = 'mode-ysf';
-    else if (m === 'dmr') cls = 'mode-dmr';
-    else if (m === 'p25') cls = 'mode-p25';
-    else if (m === 'nxdn') cls = 'mode-nxdn';
-    else if (m === 'fm') cls = 'mode-fm';
-    else if (m === 'dpmr') cls = 'mode-dpmr';
-    else if (m.includes('idle')) cls = 'mode-idle';
-    el.classList.add(cls);
-// Netzwerk-Boost (zarter Glanz)
-    if ((window._latestSource || '').toUpperCase() === 'NET') {
-      el.style.boxShadow = '0 0 0 1px #e5484d66 inset, 0 0 24px #e5484d22 inset';
-    } else {
-      el.style.boxShadow = '0 1px 0 #0004 inset';
-    }
-  }
-
-  function renderStatus(d){
-    const mode = d.mode ?? 'Idle';
-    els.mode.textContent = mode;
-    window._latestSource = d.source || '';
-    setModeClass(mode);
-
-    //const cs = (d.callsign || '').trim();
-    const cs = sanitizeCallsign(d.callsign || '');
-    const el = els.callsign; // jetzt ein <a>
-    if (cs) {
-      el.textContent = cs;
-      el.href = linkQRZ(cs); // nur QRZ – oder wähle HamQTH/RadioID
-      el.title = `Profil für ${cs} auf qrz.com öffnen`;
-    } else {
-      el.textContent = '–';
-      el.removeAttribute('href');
-      el.removeAttribute('title');
-    }
-
-    //els.callsign.textContent = cs || '–';
-    const active = !!d.active;
-
-    // Flagge in der Callsign-Kachel
-    if (d.country_code) {
-      els.flag.src = `/flags/${d.country_code}.png`;
-      els.flag.alt = d.country_code;
-      els.flag.title = d.country_code;
-      els.flag.style.display = 'block';
-    } else {
-      els.flag.style.display = 'none';
-    }
-
-    els.callsignTile.classList.toggle('callsign-active', active);
-    els.rxBadge.textContent = (d.source ? d.source : '—') + (active ? ' • active' : '');
-
-    els.activeText.textContent = active ? 'active' : 'inactive';
-    els.activeDot.classList.toggle('on', active);
-    els.ber.textContent = (d.ber == null) ? '–----' : (String(d.ber) + ' %');
-    els.dur.textContent = (d.duration == null) ? '–' : (String(d.duration) + ' s');
-    els.dgid.textContent = (d.dgid == null) ? '–' : String(d.dgid);
-    els.source.textContent = d.source || '–';    
-    els.upd.textContent = d.updated_at ?? '–';
-
-    lastUpdated = d.updated_at ? new Date(d.updated_at.replace(/([+-]\d{2})(\d{2})$/, '$1:$2')) : null;
-  }
-
-  function renderLastHeard(rows){
-    els.lhList.innerHTML = '';
-    if (!rows || rows.length === 0) {
-      const li = document.createElement('li'); li.className = 'lh-item';
-      li.innerHTML = '<span class="lh-cs">–</span><span class="lh-time">–</span><span class="lh-mode">–</span><span class="lh-num">–</span>';
-      els.lhList.appendChild(li);
-      return;
-    }
-    for (const r of rows) {
-      const li = document.createElement('li'); li.className = 'lh-item';
-  
-    const cs = document.createElement(r.callsign ? 'a' : 'span');
-    cs.className = 'lh-cs';
-
-    if (r.callsign) {
-      const clean = sanitizeCallsign(r.callsign);
-      cs.href   = linkQRZ(clean);               // https://www.qrz.com/db/...
-      cs.target = '_blank';
-      cs.rel    = 'noopener noreferrer';
-      cs.title  = `Profil für ${clean} auf qrz.com öffnen`;
-    }
-
-    if (r.country_code) {
-      const flag = document.createElement('img');
-      flag.src = `/flags/${r.country_code}.png`;
-      flag.alt = r.country_code;
-      flag.style.height = '16px';
-      flag.style.verticalAlign = 'middle';
-      flag.style.marginRight = '6px';
-      cs.appendChild(flag);
-    }
-
-    cs.appendChild(document.createTextNode(r.callsign ? sanitizeCallsign(r.callsign) : '–'));
-
-
-      const tm = document.createElement('span'); tm.className='lh-time'; tm.textContent = fmtTimeMysql(r.ts);
-
-
-    const md = document.createElement('span'); md.className='lh-mode';
-      // Mode + (optional DG-ID) als Text
-      const modeParts = [];
-      modeParts.push(r.mode || '–');
-      if (r.dgid != null) modeParts.push(`DG${r.dgid}`);
-      md.textContent = modeParts.join(' ');
-
-      // Source-Badge (RF/NET) als separater Chip
-      if (r.source) {
-        const badge = document.createElement('span');
-        badge.className = 'src-badge ' + (r.source.toUpperCase() === 'NET' ? 'src-net' : 'src-rf');
-        badge.textContent = r.source.toUpperCase();
-        md.appendChild(badge);
+    <script>
+      function sanitizeCallsign(cs) {
+        return (cs || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+      }
+      function linkQRZ(cs) {
+        const c = sanitizeCallsign(cs);
+        return `https://www.qrz.com/db/${c}`;
+      }
+      function linkHamQTH(cs) {
+        const c = sanitizeCallsign(cs);
+        return `https://www.hamqth.com/${c}`;
+      }
+      function linkRadioID(cs) {
+        const c = sanitizeCallsign(cs);
+        return `https://www.radioid.net/search?query=${c}`;
       }
 
-      const nb = document.createElement('span'); nb.className='lh-num';
-      nb.textContent = joinNum(r.duration, 's') + ' | ' + joinNum(r.ber, '%');
-      li.appendChild(cs); li.appendChild(tm); li.appendChild(md); li.appendChild(nb);
-      els.lhList.appendChild(li);
-    }
-  }
+      const els = {
+        mode: document.getElementById("mode"),
+        modeTile: document.getElementById("modeTile"),
+        callsign: document.getElementById("callsign"),
+        callsignTile: document.getElementById("callsignTile"),
+        rxBadge: document.getElementById("rxBadge"),
+        activeDot: document.getElementById("activeDot"),
+        activeText: document.getElementById("activeText"),
+        ber: document.getElementById("ber"),
+        dur: document.getElementById("dur"),
+        dgid: document.getElementById("dgid"),
+        source: document.getElementById("source"),
+        upd: document.getElementById("upd"),
+        age: document.getElementById("age"),
+        lhList: document.getElementById("lhList"),
+        flag: document.getElementById("flag"),
+      };
 
-  function joinNum(v, unit){
-    if (v === null || v === undefined) return '–––––';
-    let val = Number(v);
-    if (unit === '%') {
-      // Immer eine Nachkommastelle, z. B. 0.0 %
-      val = val.toFixed(1);
-    } else if (Number.isInteger(val)) {
-      // Ganze Sekunden etc. unverändert anzeigen
-      val = val.toString();
-    } else {
-      // sonst sinnvoll runden
-      val = val.toFixed(2);
-    }
-    return val + ' ' + unit;
-  }
+      let lastUpdated = null;
 
-  function fmtTimeMysql(ts){
-    if (!ts) return '–';
-    const d = new Date(ts.replace(' ', 'T'));
-    if (isNaN(d)) return ts; // falls kein valides Datum
-
-    const pad = n => String(n).padStart(2, '0');
-
-    const datum = pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
-    const zeit  = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-
-    // Wenn das Datum = heute, dann nur Uhrzeit zeigen, sonst Datum + Uhrzeit
-    const jetzt = new Date();
-    const istHeute = d.getDate() === jetzt.getDate() && d.getMonth() === jetzt.getMonth() && d.getFullYear() === jetzt.getFullYear();
-
-    //return istHeute ? zeit : `${datum} ${zeit}`;
-    return `${datum} ${zeit}`;
-  }
-
-  async function loadStatus(){
-    try{
-      const r = await fetch('api.php?q=status', { cache: 'no-store' });
-      if (!r.ok) throw new Error(r.status+' '+r.statusText);
-      const d = await r.json();
-      if (d && typeof d === 'object') renderStatus(d);
-    }catch(e){ console.error(e); }
-  }
-
-  async function loadLastHeard(){
-    try{
-      const r = await fetch('api.php?q=lastheard', { cache: 'no-store' });
-      if (!r.ok) throw new Error(r.status+' '+r.statusText);
-      const rows = await r.json();
-      renderLastHeard(Array.isArray(rows) ? rows : []);
-    }catch(e){ console.error(e); }
-  }
-
-  async function loadReflector() {
-    try {
-      const r = await fetch('api.php?q=reflector', { cache: 'no-store' });
-      if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
-      const d = await r.json();
-      if (d && typeof d === 'object') renderReflector(d);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  // -------- Chart: Activity by Mode (48h) --------
-  let modeChart;
-
-  async function loadActivityByMode(){
-    try{
-      const r = await fetch('api.php?q=activityByMode48h', { cache: 'no-store' });
-      if (!r.ok) throw new Error(r.status+' '+r.statusText);
-      const d = await r.json(); // { dstar: n, ysf: n, dmr: n }
-
-      const labels = ['D-Star','YSF','DMR'];
-      const data = [d.dstar||0, d.ysf||0, d.dmr||0];
-
-      if (!modeChart) {
-        const ctx = document.getElementById('modeChart').getContext('2d');
-        modeChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels,
-            datasets: [{
-              label: 'Calls (48h)',
-              data,
-              borderWidth: 1,
-              // Farben passend zu deinen Mode-Kacheln, aber etwas leuchtender
-              backgroundColor: ['#2ea1ff','#ffc857','#3ddc97'],
-              borderColor: ['#2ea1ff','#ffc857','#3ddc97']
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { color:'#eaf0f1' } },
-              y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.08)' }, ticks: { precision:0, color:'#eaf0f1' } }
-            },
-            plugins: {
-              legend: { labels: { color:'#eaf0f1' } },
-              tooltip: { enabled: true }
-            }
-          }
-        });
-      } else {
-        modeChart.data.datasets[0].data = data;
-        modeChart.update('none');
-      }
-    }catch(e){ console.error(e); }
-  }
-
-  let modeSplitChart;
-
-  async function loadActivityByModeSplit(){
-    try{
-      const r = await fetch('api.php?q=activityByMode48hSplit', { cache: 'no-store' });
-      if (!r.ok) throw new Error(r.status+' '+r.statusText);
-      const d = await r.json(); // { dstar:{RF,NET}, ysf:{RF,NET}, dmr:{RF,NET} }
-
-      const labels = ['D-Star','YSF','DMR'];
-      const rf =  [d.dstar?.RF||0, d.ysf?.RF||0, d.dmr?.RF||0];
-      const net = [d.dstar?.NET||0, d.ysf?.NET||0, d.dmr?.NET||0];
-
-      if (!modeSplitChart) {
-        const ctx = document.getElementById('modeSplitChart').getContext('2d');
-        modeSplitChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels,
-            datasets: [
-              { label: 'RF',  data: rf,  borderWidth: 1, },
-              { label: 'NET', data: net, borderWidth: 1, }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                grid: { color: 'rgba(255,255,255,0.08)' },
-                ticks: { color:'#eaf0f1' }
-              },
-              y: {
-                beginAtZero: true,
-                grid: { color: 'rgba(255,255,255,0.08)' },
-                ticks: { precision:0, color:'#eaf0f1' }
-              }
-            },
-            plugins: {
-              legend: { labels: { color:'#eaf0f1' } },
-              tooltip: {
-                callbacks: {
-                  afterLabel: (ctx) => {
-                    const total = (rf[ctx.dataIndex]||0) + (net[ctx.dataIndex]||0);
-                    if (!total) return '';
-                    const val = ctx.parsed.y || 0;
-                    const pct = (val*100/total).toFixed(1);
-                    return ` (${pct}%)`;
-                  }
-                }
-              }
-            }
-          }
-        });
-      } else {
-        modeSplitChart.data.datasets[0].data = rf;
-        modeSplitChart.data.datasets[1].data = net;
-        modeSplitChart.update('none');
-      }
-    }catch(e){ console.error(e); }
-  }
-
-  function dcsUrlFromText(t) {
-    const s = String(t || '').toUpperCase();
-    // match "DCS001", "DCS 001", optional nachfolgender Buchstabe/Leerzeichen egal
-    const m = s.match(/\bDCS\s*?(\d{3})\b/);
-    return m ? `https://dcs${m[1]}.xreflector.net/#` : 'http://xreflector.net/';
-  }
-
-  function renderReflector(d) {
-    const modes = ['dstar', 'dmr', 'fusion'];
-    for (const m of modes) {
-      const el = document.getElementById('refl-' + m);
-      const val = d[m] || 'nicht verbunden';
-      el.textContent = val;
-      el.classList.remove('refl-active', 'refl-inactive');
-      if (val.toLowerCase() === 'nicht verbunden' || val === '-----') {
-        el.classList.add('refl-inactive');
-      } else {
-        el.classList.add('refl-active');
-      }
-
-      // nur für D-Star: Link dynamisch setzen
-      if (m === 'dstar') {
-        const link = document.getElementById('refl-dstar-link');
-        if (link) link.href = dcsUrlFromText(val);
-      }
-    }
-  }
-
-// -------- Chart: Heatmap (30d) --------
-let heatmapChart;
-
-async function loadHeatmap30d() {
-  try {
-    const r = await fetch('api.php?q=heatmap30d', { cache: 'no-store' });
-    if (!r.ok) throw new Error(r.status+' '+r.statusText);
-    const rows = await r.json();
-
-    // day labels (1=Sun ... 7=Sat)
-  const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-    // Normiere Daten auf Chart.js-Matrix-Format
-    const data = rows.map(x => ({
-      x: x.hh,               // Stunde
-      y: x.dow,              // Wochentag
-      v: x.cnt
-    }));
-
-    const maxVal = Math.max(...data.map(d => d.v), 1);
-
-    const ctx = document.getElementById('heatmapChart').getContext('2d');
-    if (!heatmapChart) {
-      heatmapChart = new Chart(ctx, {
-        type: 'matrix',
-        data: {
-          datasets: [{
-            label: 'Activity',
-            data: data,
-            backgroundColor(ctx) {
-              const v = ctx.raw.v;
-              const alpha = v / maxVal;
-              return `rgba(46, 166, 255, ${0.15 + alpha * 0.85})`;
-            },
-            borderWidth: 1,
-            borderColor: '#1a1f24',
-            // 🔹 sichere Variante: prüfe, ob chartArea schon existiert
-            width: (ctx) => {
-              const ca = ctx.chart.chartArea;
-              return ca ? (ca.width / 24) - 2 : 0;
-            },
-            height: (ctx) => {
-              const ca = ctx.chart.chartArea;
-              return ca ? (ca.height / 7) - 2 : 0;
-            },
-          }]
-
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: {
-              type: 'linear',
-              position: 'bottom',
-              min: 0,
-              max: 23,
-              ticks: {
-                stepSize: 1,
-                callback: v => v,
-                padding: 6,
-                color: '#eaf0f1'
-              },
-              grid: { color: 'rgba(255,255,255,0.05)' },
-              title: { display: true, text: 'Hour (UTC)', color: '#9aa3a7' }
-            },
-            y: {
-              type: 'linear',
-              reverse: true,
-              min: 1,
-              max: 7,
-              ticks: {
-                stepSize: 1,
-                callback: v => dayLabels[v-1],
-                color: '#eaf0f1'
-              },
-              grid: { color: 'rgba(255,255,255,0.05)' },
-              title: { display: true, text: 'Day of Week', color: '#9aa3a7' }
-            }
-          },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                title: (ctx) => {
-                  const d = ctx[0].raw;
-                  return `${dayLabels[d.y-1]} ${d.x}:00`;
-                },
-                label: (ctx) => `${ctx.raw.v} Activations`
-              }
-            }
-          }
-        }
-      });
-    } else {
-      heatmapChart.data.datasets[0].data = data;
-      heatmapChart.update('none');
-    }
-  } catch (e) { console.error(e); }
-}
-
-  function updateAge(){
-    if(!lastUpdated){ els.age.textContent = 'Age: –'; return; }
-    const s = Math.max(0, Math.floor((Date.now() - lastUpdated.getTime())/1000));
-    els.age.textContent = 'Age: ' + s + ' s';
-  }
-
-  // -------- Chart: Aktivierungen 48h --------
-  let activityChart;
-  function generateHourKeys48h() {
-    // Ende: aktuelle Stunde (abgerundet)
-    const end = new Date();
-    end.setMinutes(0,0,0);
-    // Start = end - 47h
-    const start = new Date(end.getTime() - 47*3600*1000);
-    const hours = [];
-    for (let t = start.getTime(); t <= end.getTime(); t += 3600*1000) {
-      const d = new Date(t);
-      // Key im Format "YYYY-MM-DD HH:00:00" (MySQL-Ausgabe-Format)
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,'0');
-      const day = String(d.getDate()).padStart(2,'0');
-      const hh = String(d.getHours()).padStart(2,'0');
-      const key = `${y}-${m}-${day} ${hh}:00:00`;
-      hours.push(key);
-    }
-    return hours;
-  }
-  function labelFromKey(key){
-    // "YYYY-MM-DD HH:00:00" -> "DD.MM HH"
-    const d = new Date(key.replace(' ', 'T'));
-    const dd = String(d.getDate()).padStart(2,'0');
-    const mm = String(d.getMonth()+1).padStart(2,'0');
-    const hh = String(d.getHours()).padStart(2,'0');
-    return `${dd}.${mm} ${hh}`;
-  }
-
-    async function loadActivity(){
-      try{
-        const r = await fetch('api.php?q=activity48h', { cache: 'no-store' });
-        if (!r.ok) throw new Error(r.status+' '+r.statusText);
-        const rows = await r.json(); // [{hour, rf, net}, ...]
-
-        // Map mit hour->counts
-        const map = new Map(rows.map(x => [x.hour, { rf: Number(x.rf)||0, net: Number(x.net)||0 }]));
-
-        const keys = generateHourKeys48h(); // exakt 48 Keys
-        const labels = keys.map(labelFromKey);
-        const rfData  = keys.map(k => (map.get(k)?.rf)  || 0);
-        const netData = keys.map(k => (map.get(k)?.net) || 0);
-
-        if (!activityChart) {
-          const ctx = document.getElementById('activityChart').getContext('2d');
-          activityChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-              labels,
-              datasets: [
-                { label: 'RF',  data: rfData,  borderWidth: 1, stack: 'src' },
-                { label: 'NET', data: netData, borderWidth: 1, stack: 'src' }
-              ]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                x: {
-                  stacked: true,
-                  grid: { color: 'rgba(255,255,255,0.08)' },
-                  ticks: {
-                    color: '#eaf0f1',
-                    maxRotation: 90,
-                    minRotation: 90,
-                    autoSkip: true,
-                    font: { size: 10 }
-                  }
-                },
-                y: {
-                  stacked: true,
-                  beginAtZero: true,
-                  grid: { color: 'rgba(255,255,255,0.08)' },
-                  ticks: { precision:0, color:'#eaf0f1' }
-                }
-              },
-              plugins: {
-                legend: { labels: { color: '#eaf0f1' } },
-                tooltip: { enabled: true }
-              }
-            }
-          });
+      function setModeClass(mode) {
+        const el = els.modeTile;
+        el.className = "tile mode-tile"; // reset
+        const m = (mode || "").toLowerCase();
+        let cls = "mode-idle";
+        if (m.includes("d-star")) cls = "mode-dstar";
+        else if (m.includes("fusion") || m === "ysf" || m.includes("system fusion"))
+          cls = "mode-ysf";
+        else if (m === "dmr") cls = "mode-dmr";
+        else if (m === "p25") cls = "mode-p25";
+        else if (m === "nxdn") cls = "mode-nxdn";
+        else if (m === "fm") cls = "mode-fm";
+        else if (m === "dpmr") cls = "mode-dpmr";
+        else if (m.includes("idle")) cls = "mode-idle";
+        el.classList.add(cls);
+        // Netzwerk-Boost (zarter Glanz)
+        if ((window._latestSource || "").toUpperCase() === "NET") {
+          el.style.boxShadow = "0 0 0 1px #e5484d66 inset, 0 0 24px #e5484d22 inset";
         } else {
-          activityChart.data.labels = labels;
-          activityChart.data.datasets[0].data = rfData;
-          activityChart.data.datasets[1].data = netData;
-          activityChart.update('none');
+          el.style.boxShadow = "0 1px 0 #0004 inset";
         }
-      }catch(e){ console.error(e); }
-    }
+      }
 
-  // initial
-  loadStatus();
-  loadLastHeard();
-  loadActivity();
-  loadReflector();
-  loadActivityByMode();
-  loadActivityByModeSplit();
-  loadHeatmap30d();
+      function renderStatus(d) {
+        const mode = d.mode ?? "Idle";
+        els.mode.textContent = mode;
+        window._latestSource = d.source || "";
+        setModeClass(mode);
 
-  // intervals
-  setInterval(loadStatus, 1000);   // 1 Hz
-  setInterval(loadLastHeard, 2000); // 0.5 Hz
-  setInterval(loadActivity, 60000); // alle 60 s
-  setInterval(loadActivityByMode, 60000);
-  setInterval(loadActivityByModeSplit, 60000);
-  setInterval(updateAge, 1000);
-  setInterval(loadReflector, 2000);
-  setInterval(loadHeatmap30d, 60000);
-</script>
-</body>
+        //const cs = (d.callsign || '').trim();
+        const cs = sanitizeCallsign(d.callsign || "");
+        const el = els.callsign; // jetzt ein <a>
+        if (cs) {
+          el.textContent = cs;
+          el.href = linkQRZ(cs); // nur QRZ – oder wähle HamQTH/RadioID
+          el.title = `Profil für ${cs} auf qrz.com öffnen`;
+        } else {
+          el.textContent = "–";
+          el.removeAttribute("href");
+          el.removeAttribute("title");
+        }
+
+        //els.callsign.textContent = cs || '–';
+        const active = !!d.active;
+
+        // Flagge in der Callsign-Kachel
+        if (d.country_code) {
+          els.flag.src = `/flags/${d.country_code}.png`;
+          els.flag.alt = d.country_code;
+          els.flag.title = d.country_code;
+          els.flag.style.display = "block";
+        } else {
+          els.flag.style.display = "none";
+        }
+
+        els.callsignTile.classList.toggle("callsign-active", active);
+        els.rxBadge.textContent = (d.source ? d.source : "—") + (active ? " • active" : "");
+
+        els.activeText.textContent = active ? "active" : "inactive";
+        els.activeDot.classList.toggle("on", active);
+        els.ber.textContent = d.ber == null ? "–----" : String(d.ber) + " %";
+        els.dur.textContent = d.duration == null ? "–" : String(d.duration) + " s";
+        els.dgid.textContent = d.dgid == null ? "–" : String(d.dgid);
+        els.source.textContent = d.source || "–";
+        els.upd.textContent = d.updated_at ?? "–";
+
+        lastUpdated = d.updated_at
+          ? new Date(d.updated_at.replace(/([+-]\d{2})(\d{2})$/, "$1:$2"))
+          : null;
+      }
+
+      function renderLastHeard(rows) {
+        els.lhList.innerHTML = "";
+        if (!rows || rows.length === 0) {
+          const li = document.createElement("li");
+          li.className = "lh-item";
+          li.innerHTML =
+            '<span class="lh-cs">–</span><span class="lh-time">–</span><span class="lh-mode">–</span><span class="lh-num">–</span>';
+          els.lhList.appendChild(li);
+          return;
+        }
+        for (const r of rows) {
+          const li = document.createElement("li");
+          li.className = "lh-item";
+
+          const cs = document.createElement(r.callsign ? "a" : "span");
+          cs.className = "lh-cs";
+
+          if (r.callsign) {
+            const clean = sanitizeCallsign(r.callsign);
+            cs.href = linkQRZ(clean); // https://www.qrz.com/db/...
+            cs.target = "_blank";
+            cs.rel = "noopener noreferrer";
+            cs.title = `Profil für ${clean} auf qrz.com öffnen`;
+          }
+
+          if (r.country_code) {
+            const flag = document.createElement("img");
+            flag.src = `/flags/${r.country_code}.png`;
+            flag.alt = r.country_code;
+            flag.style.height = "16px";
+            flag.style.verticalAlign = "middle";
+            flag.style.marginRight = "6px";
+            cs.appendChild(flag);
+          }
+
+          cs.appendChild(
+            document.createTextNode(r.callsign ? sanitizeCallsign(r.callsign) : "–"),
+          );
+
+          const tm = document.createElement("span");
+          tm.className = "lh-time";
+          tm.textContent = fmtTimeMysql(r.ts);
+
+          const md = document.createElement("span");
+          md.className = "lh-mode";
+          // Mode + (optional DG-ID) als Text
+          const modeParts = [];
+          modeParts.push(r.mode || "–");
+          if (r.dgid != null) modeParts.push(`DG${r.dgid}`);
+          md.textContent = modeParts.join(" ");
+
+          // Source-Badge (RF/NET) als separater Chip
+          if (r.source) {
+            const badge = document.createElement("span");
+            badge.className = "src-badge " + (r.source.toUpperCase() === "NET" ? "src-net" : "src-rf");
+            badge.textContent = r.source.toUpperCase();
+            md.appendChild(badge);
+          }
+
+          const nb = document.createElement("span");
+          nb.className = "lh-num";
+          nb.textContent = joinNum(r.duration, "s") + " | " + joinNum(r.ber, "%");
+
+          li.appendChild(cs);
+          li.appendChild(tm);
+          li.appendChild(md);
+          li.appendChild(nb);
+          els.lhList.appendChild(li);
+        }
+      }
+
+      function joinNum(v, unit) {
+        if (v === null || v === undefined) return "–––––";
+        let val = Number(v);
+        if (unit === "%") {
+          // Immer eine Nachkommastelle, z. B. 0.0 %
+          val = val.toFixed(1);
+        } else if (Number.isInteger(val)) {
+          // Ganze Sekunden etc. unverändert anzeigen
+          val = val.toString();
+        } else {
+          // sonst sinnvoll runden
+          val = val.toFixed(2);
+        }
+        return val + " " + unit;
+      }
+
+      function fmtTimeMysql(ts) {
+        if (!ts) return "–";
+        const d = new Date(ts.replace(" ", "T"));
+        if (isNaN(d)) return ts; // falls kein valides Datum
+
+        const pad = (n) => String(n).padStart(2, "0");
+
+        const datum = pad(d.getDate()) + "." + pad(d.getMonth() + 1) + "." + d.getFullYear();
+        const zeit =
+          pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+
+        // Wenn das Datum = heute, dann nur Uhrzeit zeigen, sonst Datum + Uhrzeit
+        const jetzt = new Date();
+        const istHeute =
+          d.getDate() === jetzt.getDate() &&
+          d.getMonth() === jetzt.getMonth() &&
+          d.getFullYear() === jetzt.getFullYear();
+
+        //return istHeute ? zeit : `${datum} ${zeit}`;
+        return `${datum} ${zeit}`;
+      }
+
+      async function loadStatus() {
+        try {
+          const r = await fetch("api.php?q=status", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const d = await r.json();
+          if (d && typeof d === "object") renderStatus(d);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      async function loadLastHeard() {
+        try {
+          const r = await fetch("api.php?q=lastheard", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const rows = await r.json();
+          renderLastHeard(Array.isArray(rows) ? rows : []);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      async function loadReflector() {
+        try {
+          const r = await fetch("api.php?q=reflector", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const d = await r.json();
+          if (d && typeof d === "object") renderReflector(d);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // -------- Chart: Activity by Mode (48h) --------
+      let modeChart;
+
+      async function loadActivityByMode() {
+        try {
+          const r = await fetch("api.php?q=activityByMode48h", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const d = await r.json(); // { dstar: n, ysf: n, dmr: n }
+
+          const labels = ["D-Star", "YSF", "DMR"];
+          const data = [d.dstar || 0, d.ysf || 0, d.dmr || 0];
+
+          if (!modeChart) {
+            const ctx = document.getElementById("modeChart").getContext("2d");
+            modeChart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels,
+                datasets: [
+                  {
+                    label: "Calls (48h)",
+                    data,
+                    borderWidth: 1,
+                    // Farben passend zu deinen Mode-Kacheln, aber etwas leuchtender
+                    backgroundColor: ["#2ea1ff", "#ffc857", "#3ddc97"],
+                    borderColor: ["#2ea1ff", "#ffc857", "#3ddc97"],
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    grid: { color: "rgba(255,255,255,0.08)" },
+                    ticks: { color: "#eaf0f1" },
+                  },
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(255,255,255,0.08)" },
+                    ticks: { precision: 0, color: "#eaf0f1" },
+                  },
+                },
+                plugins: {
+                  legend: { labels: { color: "#eaf0f1" } },
+                  tooltip: { enabled: true },
+                },
+              },
+            });
+          } else {
+            modeChart.data.datasets[0].data = data;
+            modeChart.update("none");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      let modeSplitChart;
+
+      async function loadActivityByModeSplit() {
+        try {
+          const r = await fetch("api.php?q=activityByMode48hSplit", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const d = await r.json(); // { dstar:{RF,NET}, ysf:{RF,NET}, dmr:{RF,NET} }
+
+          const labels = ["D-Star", "YSF", "DMR"];
+          const rf = [d.dstar?.RF || 0, d.ysf?.RF || 0, d.dmr?.RF || 0];
+          const net = [d.dstar?.NET || 0, d.ysf?.NET || 0, d.dmr?.NET || 0];
+
+          if (!modeSplitChart) {
+            const ctx = document.getElementById("modeSplitChart").getContext("2d");
+            modeSplitChart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels,
+                datasets: [
+                  { label: "RF", data: rf, borderWidth: 1 },
+                  { label: "NET", data: net, borderWidth: 1 },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    grid: { color: "rgba(255,255,255,0.08)" },
+                    ticks: { color: "#eaf0f1" },
+                  },
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(255,255,255,0.08)" },
+                    ticks: { precision: 0, color: "#eaf0f1" },
+                  },
+                },
+                plugins: {
+                  legend: { labels: { color: "#eaf0f1" } },
+                  tooltip: {
+                    callbacks: {
+                      afterLabel: (ctx) => {
+                        const total = (rf[ctx.dataIndex] || 0) + (net[ctx.dataIndex] || 0);
+                        if (!total) return "";
+                        const val = ctx.parsed.y || 0;
+                        const pct = (val * 100 / total).toFixed(1);
+                        return ` (${pct}%)`;
+                      },
+                    },
+                  },
+                },
+              },
+            });
+          } else {
+            modeSplitChart.data.datasets[0].data = rf;
+            modeSplitChart.data.datasets[1].data = net;
+            modeSplitChart.update("none");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      function dcsUrlFromText(t) {
+        const s = String(t || "").toUpperCase();
+        // match "DCS001", "DCS 001", optional nachfolgender Buchstabe/Leerzeichen egal
+        const m = s.match(/\bDCS\s*?(\d{3})\b/);
+        return m ? `https://dcs${m[1]}.xreflector.net/#` : "http://xreflector.net/";
+      }
+
+      function renderReflector(d) {
+        const modes = ["dstar", "dmr", "fusion"];
+        for (const m of modes) {
+          const el = document.getElementById("refl-" + m);
+          const val = d[m] || "nicht verbunden";
+          el.textContent = val;
+          el.classList.remove("refl-active", "refl-inactive");
+          if (val.toLowerCase() === "nicht verbunden" || val === "-----") {
+            el.classList.add("refl-inactive");
+          } else {
+            el.classList.add("refl-active");
+          }
+
+          // nur für D-Star: Link dynamisch setzen
+          if (m === "dstar") {
+            const link = document.getElementById("refl-dstar-link");
+            if (link) link.href = dcsUrlFromText(val);
+          }
+        }
+      }
+
+      // -------- Chart: Heatmap (30d) --------
+      let heatmapChart;
+
+      async function loadHeatmap30d() {
+        try {
+          const r = await fetch("api.php?q=heatmap30d", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const rows = await r.json();
+
+          // day labels (1=Sun ... 7=Sat)
+          const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+          // Normiere Daten auf Chart.js-Matrix-Format
+          const data = rows.map((x) => ({
+            x: x.hh, // Stunde
+            y: x.dow, // Wochentag
+            v: x.cnt,
+          }));
+
+          const maxVal = Math.max(...data.map((d) => d.v), 1);
+
+          const ctx = document.getElementById("heatmapChart").getContext("2d");
+          if (!heatmapChart) {
+            heatmapChart = new Chart(ctx, {
+              type: "matrix",
+              data: {
+                datasets: [
+                  {
+                    label: "Activity",
+                    data: data,
+                    backgroundColor(ctx) {
+                      const v = ctx.raw.v;
+                      const alpha = v / maxVal;
+                      return `rgba(46, 166, 255, ${0.15 + alpha * 0.85})`;
+                    },
+                    borderWidth: 1,
+                    borderColor: "#1a1f24",
+                    // 🔹 sichere Variante: prüfe, ob chartArea schon existiert
+                    width: (ctx) => {
+                      const ca = ctx.chart.chartArea;
+                      return ca ? ca.width / 24 - 2 : 0;
+                    },
+                    height: (ctx) => {
+                      const ca = ctx.chart.chartArea;
+                      return ca ? ca.height / 7 - 2 : 0;
+                    },
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    type: "linear",
+                    position: "bottom",
+                    min: 0,
+                    max: 23,
+                    ticks: {
+                      stepSize: 1,
+                      callback: (v) => v,
+                      padding: 6,
+                      color: "#eaf0f1",
+                    },
+                    grid: { color: "rgba(255,255,255,0.05)" },
+                    title: { display: true, text: "Hour (UTC)", color: "#9aa3a7" },
+                  },
+                  y: {
+                    type: "linear",
+                    reverse: true,
+                    min: 1,
+                    max: 7,
+                    ticks: {
+                      stepSize: 1,
+                      callback: (v) => dayLabels[v - 1],
+                      color: "#eaf0f1",
+                    },
+                    grid: { color: "rgba(255,255,255,0.05)" },
+                    title: { display: true, text: "Day of Week", color: "#9aa3a7" },
+                  },
+                },
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    callbacks: {
+                      title: (ctx) => {
+                        const d = ctx[0].raw;
+                        return `${dayLabels[d.y - 1]} ${d.x}:00`;
+                      },
+                      label: (ctx) => `${ctx.raw.v} Activations`,
+                    },
+                  },
+                },
+              },
+            });
+          } else {
+            heatmapChart.data.datasets[0].data = data;
+            heatmapChart.update("none");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      function updateAge() {
+        if (!lastUpdated) {
+          els.age.textContent = "Age: –";
+          return;
+        }
+        const s = Math.max(0, Math.floor((Date.now() - lastUpdated.getTime()) / 1000));
+        els.age.textContent = "Age: " + s + " s";
+      }
+
+      // -------- Chart: Aktivierungen 48h --------
+      let activityChart;
+
+      function generateHourKeys48h() {
+        // Ende: aktuelle Stunde (abgerundet)
+        const end = new Date();
+        end.setMinutes(0, 0, 0);
+        // Start = end - 47h
+        const start = new Date(end.getTime() - 47 * 3600 * 1000);
+        const hours = [];
+        for (let t = start.getTime(); t <= end.getTime(); t += 3600 * 1000) {
+          const d = new Date(t);
+          // Key im Format "YYYY-MM-DD HH:00:00" (MySQL-Ausgabe-Format)
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          const hh = String(d.getHours()).padStart(2, "0");
+          const key = `${y}-${m}-${day} ${hh}:00:00`;
+          hours.push(key);
+        }
+        return hours;
+      }
+
+      function labelFromKey(key) {
+        // "YYYY-MM-DD HH:00:00" -> "DD.MM HH"
+        const d = new Date(key.replace(" ", "T"));
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const hh = String(d.getHours()).padStart(2, "0");
+        return `${dd}.${mm} ${hh}`;
+      }
+
+      async function loadActivity() {
+        try {
+          const r = await fetch("api.php?q=activity48h", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const rows = await r.json(); // [{hour, rf, net}, ...]
+
+          // Map mit hour->counts
+          const map = new Map(
+            rows.map((x) => [x.hour, { rf: Number(x.rf) || 0, net: Number(x.net) || 0 }]),
+          );
+
+          const keys = generateHourKeys48h(); // exakt 48 Keys
+          const labels = keys.map(labelFromKey);
+          const rfData = keys.map((k) => map.get(k)?.rf || 0);
+          const netData = keys.map((k) => map.get(k)?.net || 0);
+
+          if (!activityChart) {
+            const ctx = document.getElementById("activityChart").getContext("2d");
+            activityChart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels,
+                datasets: [
+                  { label: "RF", data: rfData, borderWidth: 1, stack: "src" },
+                  { label: "NET", data: netData, borderWidth: 1, stack: "src" },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    stacked: true,
+                    grid: { color: "rgba(255,255,255,0.08)" },
+                    ticks: {
+                      color: "#eaf0f1",
+                      maxRotation: 90,
+                      minRotation: 90,
+                      autoSkip: true,
+                      font: { size: 10 },
+                    },
+                  },
+                  y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    grid: { color: "rgba(255,255,255,0.08)" },
+                    ticks: { precision: 0, color: "#eaf0f1" },
+                  },
+                },
+                plugins: {
+                  legend: { labels: { color: "#eaf0f1" } },
+                  tooltip: { enabled: true },
+                },
+              },
+            });
+          } else {
+            activityChart.data.labels = labels;
+            activityChart.data.datasets[0].data = rfData;
+            activityChart.data.datasets[1].data = netData;
+            activityChart.update("none");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // ---------- Durchschnittliche Sendedauer pro Mode ----------
+      let avgDurationByModeChart;
+      async function loadAvgDurationByMode() {
+        try {
+          const r = await fetch("api.php?q=avgDurationByMode", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          // Erwartet: [{mode:"D-Star", avg:10.41}, {mode:"DMR", avg:16.53}, {mode:"YSF", avg:10.02}]
+          const rows = await r.json();
+
+          const labels = rows.map((x) => x.mode || "—");
+          const data = rows.map((x) => Number(x.avg) || 0);
+
+          if (!avgDurationByModeChart) {
+            const ctx = document.getElementById("avgDurationByModeChart").getContext("2d");
+            avgDurationByModeChart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels,
+                datasets: [
+                  {
+                    label: "Ø Time (s)",
+                    data,
+                    borderWidth: 1,
+                    backgroundColor: ["#2ea1ff", "#ffc857", "#3ddc97", "#b889f4", "#ff6b6b"],
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    grid: { color: "rgba(255,255,255,.08)" },
+                    ticks: { color: "#eaf0f1", maxRotation: 90, minRotation: 90 },
+                  },
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(255,255,255,.08)" },
+                    ticks: { color: "#eaf0f1" },
+                  },
+                },
+                plugins: { legend: { labels: { color: "#eaf0f1" } }, tooltip: { enabled: true } },
+              },
+            });
+          } else {
+            avgDurationByModeChart.data.labels = labels;
+            avgDurationByModeChart.data.datasets[0].data = data;
+            avgDurationByModeChart.update("none");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // ---------- Anzahl QSOs pro Callsign (Top 10) ----------
+      let callsignTop10CountChart;
+      async function loadCallsignTop10Count() {
+        try {
+          const r = await fetch("api.php?q=callsignTop10Count", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          // Erwartet: [{callsign:"DJ0ABR", cnt:43}, ...] bereits Top10 sortiert
+          const rows = await r.json();
+
+          const labels = rows.map((x) => x.callsign || "—");
+          const data = rows.map((x) => Number(x.cnt) || 0);
+
+          if (!callsignTop10CountChart) {
+            const ctx = document.getElementById("callsignTop10CountChart").getContext("2d");
+            callsignTop10CountChart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels,
+                datasets: [{ label: "Transmissions", data, borderWidth: 1, backgroundColor: "#2ea1ff" }],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    grid: { color: "rgba(255,255,255,.08)" },
+                    ticks: {
+                      color: "#eaf0f1",
+                      maxRotation: 90,
+                      minRotation: 90,
+                      autoSkip: false,
+                    },
+                  },
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(255,255,255,.08)" },
+                    ticks: { precision: 0, color: "#eaf0f1" },
+                  },
+                },
+                plugins: { legend: { labels: { color: "#eaf0f1" } }, tooltip: { enabled: true } },
+              },
+            });
+          } else {
+            callsignTop10CountChart.data.labels = labels;
+            callsignTop10CountChart.data.datasets[0].data = data;
+            callsignTop10CountChart.update("none");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // ---------- Gesamtsendezeit pro Callsign (Top 10) ----------
+      let callsignTop10DurationChart;
+      async function loadCallsignTop10Duration() {
+        try {
+          const r = await fetch("api.php?q=callsignTop10Duration", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          // Erwartet: [{callsign:"DO6HM", sec:589.283}, ...] bereits Top10 sortiert
+          const rows = await r.json();
+
+          const labels = rows.map((x) => x.callsign || "—");
+          const data = rows.map((x) => Number(x.sec) || 0);
+
+          if (!callsignTop10DurationChart) {
+            const ctx = document.getElementById("callsignTop10DurationChart").getContext("2d");
+            callsignTop10DurationChart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels,
+                datasets: [{ label: "Seconds", data, borderWidth: 1, backgroundColor: "#3ddc97" }],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    grid: { color: "rgba(255,255,255,.08)" },
+                    ticks: {
+                      color: "#eaf0f1",
+                      maxRotation: 90,
+                      minRotation: 90,
+                      autoSkip: false,
+                    },
+                  },
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(255,255,255,.08)" },
+                    ticks: { color: "#eaf0f1" },
+                  },
+                },
+                plugins: {
+                  legend: { labels: { color: "#eaf0f1" } },
+                  tooltip: {
+                    callbacks: { label: (ctx) => ctx.parsed.y.toFixed(1) + " s" },
+                  },
+                },
+              },
+            });
+          } else {
+            callsignTop10DurationChart.data.labels = labels;
+            callsignTop10DurationChart.data.datasets[0].data = data;
+            callsignTop10DurationChart.update("none");
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      let hallOfFameChart;
+
+      async function loadHallOfFame(sinceHours = 720, limit = 10) {
+        try {
+          const url = `api.php?q=hallOfFame&since_h=${sinceHours}&limit=${limit}`;
+          const r = await fetch(url, { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const rows = await r.json(); // [{callsign, qso_count, total_sec, avg_sec, score, country_code?}, ...]
+
+          const labels = rows.map((x) => x.callsign);
+          const data = rows.map((x) => Number(x.score) || 0);
+
+          // Chart
+          if (!hallOfFameChart) {
+            const ctx = document.getElementById("hallOfFameChart").getContext("2d");
+            hallOfFameChart = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels,
+                datasets: [
+                  {
+                    label: "Score",
+                    data,
+                    borderWidth: 1,
+                    backgroundColor: "#b889f4", // Lila – hebt sich ab
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    grid: { color: "rgba(255,255,255,0.08)" },
+                    ticks: { color: "#eaf0f1", maxRotation: 90, minRotation: 90, autoSkip: false },
+                  },
+                  y: {
+                    beginAtZero: true,
+                    grid: { color: "rgba(255,255,255,0.08)" },
+                    ticks: { color: "#eaf0f1" },
+                  },
+                },
+                plugins: {
+                  legend: { labels: { color: "#eaf0f1" } },
+                  tooltip: {
+                    callbacks: {
+                      // zeige zusätzlich QSOs + Zeit
+                      afterBody: (items) => {
+                        const i = items[0].dataIndex;
+                        const r = rows[i];
+                        const sec = (Number(r.total_sec) || 0).toFixed(1);
+                        return [
+                          `QSOs: ${r.qso_count}`,
+                          `Zeit: ${sec} s`,
+                          `Ø: ${(Number(r.avg_sec) || 0).toFixed(1)} s`,
+                        ];
+                      },
+                    },
+                  },
+                },
+              },
+            });
+          } else {
+            hallOfFameChart.data.labels = labels;
+            hallOfFameChart.data.datasets[0].data = data;
+            hallOfFameChart.update("none");
+          }
+
+          // Liste darunter (mit kleinen Flaggen + Links)
+          const ul = document.getElementById("hofList");
+          ul.innerHTML = "";
+          rows.forEach((r, idx) => {
+            const li = document.createElement("li");
+            li.className = "lh-item";
+            const cs = document.createElement("a");
+            cs.className = "lh-cs";
+            cs.href = `https://www.qrz.com/db/${encodeURIComponent(r.callsign)}`;
+            cs.target = "_blank";
+            cs.rel = "noopener noreferrer";
+            cs.title = `Profil für ${r.callsign} auf qrz.com öffnen`;
+
+            // Medaillen-Emoji für Top 3
+            const medal = idx === 0 ? "🥇 " : idx === 1 ? "🥈 " : idx === 2 ? "🥉 " : "";
+            // Flagge
+            if (r.country_code) {
+              const flag = document.createElement("img");
+              flag.src = `/flags/${r.country_code}.png`;
+              flag.alt = r.country_code;
+              flag.style.height = "16px";
+              flag.style.verticalAlign = "middle";
+              flag.style.marginRight = "6px";
+              cs.appendChild(flag);
+            }
+            cs.appendChild(document.createTextNode(medal + r.callsign));
+
+            const tm = document.createElement("span");
+            tm.className = "lh-time";
+            tm.textContent = `Score ${Number(r.score || 0).toFixed(1)}`;
+
+            const md = document.createElement("span");
+            md.className = "lh-mode";
+            md.textContent = `QSOs ${r.qso_count}`;
+
+            const nb = document.createElement("span");
+            nb.className = "lh-num";
+            nb.textContent = `${(Number(r.total_sec) || 0).toFixed(1)} s`;
+
+            li.appendChild(cs);
+            li.appendChild(tm);
+            li.appendChild(md);
+            li.appendChild(nb);
+            ul.appendChild(li);
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      // initial
+      loadStatus();
+      loadLastHeard();
+      loadActivity();
+      loadReflector();
+      loadActivityByMode();
+      loadActivityByModeSplit();
+      loadHeatmap30d();
+      loadAvgDurationByMode();
+      loadCallsignTop10Count();
+      loadCallsignTop10Duration();
+      loadHallOfFame(720, 10); // 30 Tage, Top 10
+
+      // periodic refresh
+      setInterval(() => loadHallOfFame(720, 10), 60000);
+      setInterval(loadAvgDurationByMode, 60000);
+      setInterval(loadCallsignTop10Count, 60000);
+      setInterval(loadCallsignTop10Duration, 60000);
+      setInterval(loadStatus, 1000); // 1 Hz
+      setInterval(loadLastHeard, 2000); // 0.5 Hz
+      setInterval(loadActivity, 60000); // alle 60 s
+      setInterval(loadActivityByMode, 60000);
+      setInterval(loadActivityByModeSplit, 60000);
+      setInterval(updateAge, 1000);
+      setInterval(loadReflector, 2000);
+      setInterval(loadHeatmap30d, 60000);
+    </script>
+  </body>
 </html>
