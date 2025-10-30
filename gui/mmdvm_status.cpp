@@ -56,6 +56,34 @@ struct TransmissionState {
     std::string openedLine; // zur Info
 };
 
+
+// Liest das eigene Callsign aus /etc/MMDVMHost.ini
+static std::string readLocalCallsign() {
+    const std::string path = "/etc/MMDVMHost.ini";
+    std::ifstream f(path);
+    if (!f) {
+        dlog("[WARN] Kann ", path, " nicht öffnen – kein lokales Callsign bekannt");
+        return "";
+    }
+
+    std::string line;
+    while (std::getline(f, line)) {
+        if (line.rfind("Callsign=", 0) == 0) {
+            std::string cs = line.substr(std::strlen("Callsign="));
+            // trim whitespaces
+            size_t a = cs.find_first_not_of(" \t\r\n");
+            size_t b = cs.find_last_not_of(" \t\r\n");
+            if (a == std::string::npos) return "";
+            cs = cs.substr(a, b - a + 1);
+            dlog("[INFO] Lokales Callsign erkannt: ", cs);
+            return cs;
+        }
+    }
+
+    dlog("[WARN] Kein Callsign= in ", path, " gefunden");
+    return "";
+}
+
 // Ein gültiges Callsign muss mindestens zwei Buchstaben und eine Zahl enthalten.
 static bool isValidCallsign(const std::string& cs) {
     if (cs.size() < 3) return false;  // zu kurz
@@ -212,7 +240,8 @@ static inline bool starts_with(const std::string& s, const char* pfx) {
 
 class LogParser {
 public:
-    LogParser() {
+    explicit LogParser(const std::string& localCall = "")
+        : localCallsign(localCall) {
         // --- D-Star ---
         rx.dstar_netStart = std::regex(R"(D-Star,\s+received\s+network\s+header\s+from\s+(\S+))");
         rx.dstar_netEnd   = std::regex(R"(D-Star,\s+received\s+network\s+end\s+of\s+transmission\s+from\s+(\S+).*?,\s*([\d.]+)\s+seconds,.*?BER:\s*([\d.]+)%)");
@@ -223,9 +252,13 @@ public:
         rx.ysf_netStartA  = std::regex(R"(YSF,\s+received\s+network\s+data\s+from\s+(\S+)\s+to\s+DG-ID\s+(\d+)\s+at\s+\S+)");
         rx.ysf_netStartB  = std::regex(R"(YSF,\s+received\s+network\s+data\s+from\s+(\S+)\s+to\s+DG-ID\s+(\d+))");
         rx.ysf_netEndA    = std::regex(R"(YSF,\s+network\s+watchdog\s+has\s+expired,\s*([\d.]+)\s+seconds(?:,[^,]*)?,\s*BER:\s*([\d.]+)%)");
-        rx.ysf_netEndB    = std::regex(R"(YSF,\s+received\s+network\s+end\s+of\s+transmission\s+from\s+(\S+)\s+to\s+DG-ID\s+(\d+),\s*([\d.]+)\s+seconds,.*?BER:\s*([\d.]+)%)");
+        rx.ysf_netEndB = std::regex(
+            R"(YSF,\s+received\s+network\s+end\s+of\s+transmission\s+from\s+(\S+)\s+to\s+DG-ID\s+(\d+),\s*([\d.]+)\s+seconds(?:,.*?BER:\s*([\d.]+)%)?)"
+        );
         rx.ysf_rfStart    = std::regex(R"(YSF,\s+received\s+RF\s+header\s+from\s+(\S+)\s+to\s+DG-ID\s+(\d+))");
-        rx.ysf_rfEnd      = std::regex(R"(YSF,\s+received\s+RF\s+end\s+of\s+transmission\s+from\s+(\S+)\s+to\s+DG-ID\s+(\d+),\s*([\d.]+)\s+seconds,\s*BER:\s*([\d.]+)%)");
+        rx.ysf_rfEnd = std::regex(
+            R"(YSF,\s+received\s+RF\s+end\s+of\s+transmission\s+from\s+(\S+)\s+to\s+DG-ID\s+(\d+),\s*([\d.]+)\s+seconds(?:,.*?BER:\s*([\d.]+)%)?)"
+        );
 
         // --- DMR ---
         rx.dmr_netStart   = std::regex(R"(DMR\s+Slot\s+\d+,\s+received\s+network\s+voice\s+header\s+from\s+(\S+)\s+to\s+TG\s+(\d+))");
@@ -391,7 +424,9 @@ public:
             if (std::regex_search(line, m, rx.ysf_netEndB)) {
                 std::string cs = m[1].str();
                 int dg = std::stoi(m[2].str());
-                return handleEnd(line, ts, "YSF", "NET", cs, dg, toDouble(m[3].str()), toDouble(m[4].str()));
+                double dur = toDouble(m[3].str());
+                std::optional<double> ber = (m.size() > 4 && m[4].matched) ? std::optional<double>(toDouble(m[4].str())) : std::nullopt;
+                return handleEnd(line, ts, "YSF", "NET", cs, dg, dur, ber);
             }
             if (std::regex_search(line, m, rx.ysf_netEndA)) {
                 // Watchdog-Ende ohne Callsign/DG-ID
@@ -405,7 +440,9 @@ public:
             if (std::regex_search(line, m, rx.ysf_rfEnd)) {
                 std::string cs = m[1].str();
                 int dg = std::stoi(m[2].str());
-                return handleEnd(line, ts, "YSF", "RF", cs, dg, toDouble(m[3].str()), toDouble(m[4].str()));
+                double dur = toDouble(m[3].str());
+                std::optional<double> ber = (m.size() > 4 && m[4].matched) ? std::optional<double>(toDouble(m[4].str())) : std::nullopt;
+                return handleEnd(line, ts, "YSF", "RF", cs, dg, dur, ber);
             }
         }
 
@@ -454,6 +491,8 @@ public:
     }
 
 private:
+    std::string localCallsign;
+
     struct Regexes {
         // D-Star
         std::regex dstar_netStart, dstar_netEnd, dstar_rfStart, dstar_rfEnd;
@@ -533,6 +572,15 @@ private:
                 const std::string& callsign,
                 std::optional<int> dgId) {
         if (!isValidCallsign(callsign)) return std::nullopt;
+
+        // ignore if it's our own callsign (with optional -suffix)
+        auto isSelf = [&](const std::string& cs) -> bool {
+            if (localCallsign.empty() || cs.empty()) return false;
+            if (cs.rfind(localCallsign, 0) == 0) return true; // beginnt mit eigenem Callsign
+            return false;
+        };
+        if (isSelf(callsign)) return std::nullopt;
+
         // Falls noch offen → zuerst erzwungen beenden
         std::optional<ParsedResult> priorEnd;
         if (open_) {
@@ -566,6 +614,15 @@ private:
             std::optional<double> durationSec,
             std::optional<double> berPct) {
         if (!isValidCallsign(callsign)) return std::nullopt;
+
+        // ignore if it's our own callsign (with optional -suffix)
+        auto isSelf = [&](const std::string& cs) -> bool {
+            if (localCallsign.empty() || cs.empty()) return false;
+            if (cs.rfind(localCallsign, 0) == 0) return true; // beginnt mit eigenem Callsign
+            return false;
+        };
+        if (isSelf(callsign)) return std::nullopt;
+
         // Falls das Ende kein Rufzeichen/DG-ID liefert (z. B. YSF Watchdog),
         // nimm die Werte aus der offenen Übertragung, wenn vorhanden.
         std::string outCallsign = callsign;
@@ -1133,7 +1190,8 @@ int main(int argc, char** argv) {
     std::cerr.setf(std::ios::unitbuf);
 
     // Parser bleibt über die gesamte Laufzeit bestehen
-    LogParser parser;
+    std::string localCall = readLocalCallsign();
+    LogParser parser(localCall);
     Database   db;
 
     // Argumente gemerkt: wenn keine angegeben sind, beobachten wir immer die heutigen Standardpfade

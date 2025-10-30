@@ -710,7 +710,6 @@
         window._latestSource = d.source || "";
         setModeClass(mode);
 
-        //const cs = (d.callsign || '').trim();
         const cs = sanitizeCallsign(d.callsign || "");
         const el = els.callsign; // jetzt ein <a>
         if (cs) {
@@ -723,7 +722,6 @@
           el.removeAttribute("title");
         }
 
-        //els.callsign.textContent = cs || '–';
         const active = !!d.active;
 
         // Flagge in der Callsign-Kachel
@@ -824,11 +822,11 @@
       }
 
       function joinNum(v, unit) {
-        if (v === null || v === undefined) return "–––––";
+        if (v === null || v === undefined) return "---";
         let val = Number(v);
         if (unit === "%") {
           // Immer eine Nachkommastelle, z. B. 0.0 %
-          val = val.toFixed(1);
+          val = val.toFixed(0);
         } else if (Number.isInteger(val)) {
           // Ganze Sekunden etc. unverändert anzeigen
           val = val.toString();
@@ -1518,7 +1516,7 @@
 
             const md = document.createElement("span");
             md.className = "lh-mode";
-            md.textContent = `QSOs ${r.qso_count}`;
+            md.textContent = `Transm. ${r.qso_count}`;
 
             const nb = document.createElement("span");
             nb.className = "lh-num";
