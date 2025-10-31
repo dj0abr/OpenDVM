@@ -38,7 +38,7 @@ Symbol="Wi"
 [Network]
 Startup=DE-C4FM-Germany
 Reconnect=1
-InactivityTimeout=1440
+InactivityTimeout=15
 Revert=1
 Debug=0
 Options="32,88"

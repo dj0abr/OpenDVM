@@ -107,20 +107,28 @@ Installation is fully automated through **four shell scripts**, which install al
 
 ### Installation Order
 
-1. **`install_mm.sh`**  
+1. ** find your Serial-USB adapter IDs **  
+   - Run `lsusb` in the terminal
+   - Look for a line like:
+     `Bus 002 Device 002: ID 0403:6015 Future Technology Devices International, Ltd Bridge` (yours may look slightly different)
+   - Note the numeric pair 0403:6015, where VID=0403 and PID=6015. Use your actual values.
+
+2. **`install_mm.sh`**  
+   - Run the script with:
+     `sudo MMDVM_VID=0403 MMDVM_PID=6015 ./install_mm.sh` (replace the numbers with your actual VID/PID)
    - Installs all system dependencies  
    - Prepares directories (e.g., `/var/log/mmdvm`)  
    - Sets up the MariaDB database  
    - Compiles and installs the C++ backend  
    - Installs the central DV interface **MMDVMHost**
 
-2. **`install_ysf.sh`**  
+3. **`install_ysf.sh`**  
    - Installs and configures the **System Fusion Gateway**
 
-3. **`install_irc.sh`**  
+4. **`install_irc.sh`**  
    - Installs and configures the **D-Star Gateway**
 
-4. **`install_dmr.sh`**  
+5. **`install_dmr.sh`**  
    - Installs and configures the **DMR Gateway**
 
 👉 **Important:**  
