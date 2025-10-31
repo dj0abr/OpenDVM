@@ -212,12 +212,16 @@ configs/site.conf.sample
 
    `
    /etc/MMDVMHost.ini
+
    /etc/ircddbgateway
+
    /etc/ysfgateway
+
    /etc/dmrgateway
    `
 
    Vor jeder Änderung wird automatisch ein **Backup** erstellt:
+   
    `
    file.bak-YYYYMMDD-HHMMSS
    `
