@@ -19,13 +19,19 @@ umask 022
 echo "[*] Checking root..."
 [ "$(id -u)" -eq 0 ] || { echo "Please run as root"; exit 1; }
 
+# --- Serial device check (handled by install_serial.sh) -----------------------
+echo "[*] Checking for /dev/mmdvm ..."
+if [[ ! -e /dev/mmdvm ]]; then
+  echo "[-] /dev/mmdvm not found."
+  echo "    Please run ./install_serial.sh first to create a persistent symlink."
+  exit 1
+fi
+
 echo "[*] Creating service user 'mmdvm'..."
 if ! id mmdvm >/dev/null 2>&1; then
   adduser --system --group --no-create-home --shell /usr/sbin/nologin mmdvm
 fi
 usermod -aG dialout mmdvm || true
-# Logverzeichnisse gehören dem Dienstuser
-chown -R mmdvm:mmdvm /var/log/mmdvm /var/log/pi-star || true
 
 echo "[*] Installing dependencies..."
 # Update package lists
@@ -35,7 +41,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
   git build-essential cmake libusb-1.0-0-dev \
   libasound2-dev libfftw3-dev libgps-dev \
   libwxgtk3.2-dev \
-  logrotate curl ca-certificates libmariadb-dev mariadb-server apache2 php libapache2-mod-php php php-mysql
+  logrotate curl ca-certificates libmariadb-dev mariadb-server apache2 php libapache2-mod-php php php-mysql wget
 
 apt-get autoremove -y || true
 apt-get clean || true
@@ -46,13 +52,9 @@ DEBIAN_FRONTEND=noninteractive apt-get purge -y modemmanager || true
 
 echo "[*] Creating required directories..."
 # Log directory
-sudo mkdir -p /var/log/pi-star
-sudo chown -R mmdvm:mmdvm /var/log/pi-star
-sudo chmod 0755 /var/log/pi-star
-
-sudo mkdir -p /var/log/mmdvm
-sudo chown -R mmdvm:mmdvm /var/log/mmdvm
-sudo chmod 0755 /var/log/mmdvm
+mkdir -p /var/log/mmdvm
+chown -R mmdvm:mmdvm /var/log/mmdvm
+chmod 0755 /var/log/mmdvm
 
 # Directory for various files (reflector tables, etc.)
 install -d -m 755 /usr/local/etc
@@ -96,19 +98,6 @@ echo "[*] Setting up log rotation (default file must be located in ./configs)...
 [ -f configs/mmdvm-logrotate ] || { echo "Error: configs/mmdvm-logrotate is missing"; exit 1; }
 install -m 644 configs/mmdvm-logrotate /etc/logrotate.d/mmdvm
 
-echo "[*] Creating udev rules for stable USB-serial device naming (/dev/mmdvm)..."
-MMDVM_VID="${MMDVM_VID:-0403}"
-MMDVM_PID="${MMDVM_PID:-6015}"
-RULE="/etc/udev/rules.d/99-mmdvm.rules"
-# Create default rule
-cat >"$RULE" <<'EOF'
-SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", SYMLINK+="mmdvm", GROUP="dialout", MODE="0660"
-EOF
-# Insert VID/PID
-sed -i "s/ATTRS{idVendor}==\"[0-9a-fA-F]\+\"/ATTRS{idVendor}==\"${MMDVM_VID}\"/; s/ATTRS{idProduct}==\"[0-9a-fA-F]\+\"/ATTRS{idProduct}==\"${MMDVM_PID}\"/" "$RULE"
-# Reload and apply udev rules
-udevadm control --reload-rules && udevadm trigger || true
-
 echo "[*] Setup Config Parser ..."
 cd configs
 ./compile.sh
@@ -123,15 +112,6 @@ cd ..
 install -m 644 gui/mmdvm-status.service /etc/systemd/system/mmdvm-status.service
 
 SQL_COMMANDS="
-DROP USER IF EXISTS 'mmdvm'@'localhost';
-CREATE DATABASE IF NOT EXISTS mmdvmdb CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-CREATE USER 'mmdvm'@'localhost' IDENTIFIED BY 'db0slrelais';
-GRANT ALL PRIVILEGES ON mmdvmdb.* TO 'mmdvm'@'localhost';
-FLUSH PRIVILEGES;
-"
-
-
-SQL_COMMANDS="
 -- Datenbank anlegen, falls noch nicht vorhanden
 CREATE DATABASE IF NOT EXISTS mmdvmdb
   CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -143,9 +123,9 @@ CREATE USER IF NOT EXISTS 'www-data'@'localhost' IDENTIFIED VIA unix_socket;
 GRANT SELECT ON mmdvmdb.* TO 'www-data'@'localhost';
 FLUSH PRIVILEGES;
 "
-echo "→ Initialisiere MariaDB für MMDVM..."
+echo "→ initializing MariaDB for MMDVM..."
 mysql -u root --protocol=socket -e "${SQL_COMMANDS}"
-echo "✅ Fertig."
+echo "[*] Done."
 
 echo "[*] Enabling the MMDVMHost service..."
 systemctl daemon-reload

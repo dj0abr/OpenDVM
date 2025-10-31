@@ -107,11 +107,9 @@ Installation is fully automated through **four shell scripts**, which install al
 
 ### Installation Order
 
-1. **find your Serial-USB adapter IDs**  
-   - Run `lsusb` in the terminal
-   - Look for a line like:
-     `Bus 002 Device 002: ID 0403:6015 Future Technology Devices International, Ltd Bridge` (yours may look slightly different)
-   - Note the numeric pair 0403:6015, where VID=0403 and PID=6015. Use your actual values.
+1. **`install_serial.sh`**  
+   - Detects your serial device (USB, onboard UART, etc.), lets you pick the correct one
+   - re-run this script to switch to a different device (e.g. a new hardware)s
 
 2. **`install_mm.sh`**  
    - Run the script with:
