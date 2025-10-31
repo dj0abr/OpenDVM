@@ -161,7 +161,7 @@ Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
    - Installiert und konfiguriert das **DMR‑Gateway**
 
 Nach Abschluss werden **Standard‑Konfigurationsdateien** automatisch nach `/etc` kopiert.  
-Sie müssen anschließend an Ihre Umgebung angepasst werden – siehe [Central Configuration & Config Renderer](#-central-configuration--config-renderer).
+Sie müssen anschließend an Ihre Umgebung angepasst werden – siehe [Konfiguration](#-Konfiguration).
 
 ---
 
@@ -169,12 +169,12 @@ Sie müssen anschließend an Ihre Umgebung angepasst werden – siehe [Central C
 
 Alle Standort‑ und Systemparameter für die G4KLX‑Module werden in folgenden Konfigurationsdateien gespeichert:
 
-```
+`
 /etc/MMDVMHost.ini
 /etc/ircddbgateway
 /etc/ysfgateway
 /etc/dmrgateway
-```
+`
 
 Beispielversionen dieser Dateien sind in diesem Paket enthalten (mit der Endung .sample) und müssen an Ihre Station oder Ihren Repeater angepasst werden.
 
@@ -186,9 +186,9 @@ Bei besonderen Anforderungen oder erweiterten Einstellungen können Sie die Konf
 
 Eine Vorlage für die site.conf befindet sich unter:
 
-```
+`
 configs/site.conf.sample
-```
+`
 
 ### Schritte
 
@@ -210,17 +210,17 @@ configs/site.conf.sample
    ```
    Das Programm liest Ihre `site.conf` und füllt alle Werte automatisch in folgende Konfigurationsdateien ein:
 
-   ```
+   `
    /etc/MMDVMHost.ini
    /etc/ircddbgateway
    /etc/ysfgateway
    /etc/dmrgateway
-   ```
+   `
 
    Vor jeder Änderung wird automatisch ein **Backup** erstellt:
-   ```
+   `
    file.bak-YYYYMMDD-HHMMSS
-   ```
+   `
 
 4. **Abschließen:**  
    Nach dem Rendern ist die Installation abgeschlossen.  
