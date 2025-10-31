@@ -110,6 +110,7 @@ Die Installation erfolgt vollständig automatisiert über **fünf Shell‑Skript
 Als erstes lade dieses Repository von Github herunter:
 ```bash
 git clone https://github.com/dj0abr/OpenDVM.git
+cd OpenDVM
 ```
 
 Jetzt führe die fünf Scripts (alle mit `sudo`) wie folgt aus:

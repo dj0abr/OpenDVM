@@ -111,6 +111,7 @@ First, download this repository from GitHub:
 
 ```bash
 git clone https://github.com/dj0abr/OpenDVM.git
+cd OpenDVM
 ```
 
 Now run the five scripts (all with sudo) as follows:
