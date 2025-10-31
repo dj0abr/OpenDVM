@@ -170,12 +170,10 @@ They must then be adjusted to match your setup – see [Central Configuration & 
 
 All site and system parameters for the G4KLX modules are stored in the following configuration files:
 
-```
-/etc/MMDVMHost.ini
-/etc/ircddbgateway
-/etc/ysfgateway
-/etc/dmrgateway
-```
+   /etc/MMDVMHost.ini  
+   /etc/ircddbgateway  
+   /etc/ysfgateway  
+   /etc/dmrgateway
 
 Sample versions of these files are included in this package (with a .sample extension) and must be customized to match your station or repeater setup.
 
@@ -187,9 +185,9 @@ If you require special adjustments or advanced settings, you can still edit the 
 
 A template for site.conf can be found at:
 
-```
+`
 configs/site.conf.sample
-```
+`
 
 ### Steps
 
@@ -211,17 +209,16 @@ configs/site.conf.sample
    ```
    The program reads your `site.conf` and automatically fills all values into the following configuration files:
 
-   ```
-   /etc/MMDVMHost.ini
-   /etc/ircddbgateway
-   /etc/ysfgateway
+   /etc/MMDVMHost.ini  
+   /etc/ircddbgateway  
+   /etc/ysfgateway  
    /etc/dmrgateway
-   ```
 
    Before any modification, a **backup** is automatically created:
-   ```
+   
+   `
    file.bak-YYYYMMDD-HHMMSS
-   ```
+   `
 
 4. **Finalize:**
    After rendering, the installation is complete.  

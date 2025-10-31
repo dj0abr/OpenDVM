@@ -169,12 +169,10 @@ Sie müssen anschließend an Ihre Umgebung angepasst werden – siehe [Konfigura
 
 Alle Standort‑ und Systemparameter für die G4KLX‑Module werden in folgenden Konfigurationsdateien gespeichert:
 
-`
-/etc/MMDVMHost.ini
-/etc/ircddbgateway
-/etc/ysfgateway
-/etc/dmrgateway
-`
+   /etc/MMDVMHost.ini  
+   /etc/ircddbgateway  
+   /etc/ysfgateway  
+   /etc/dmrgateway
 
 Beispielversionen dieser Dateien sind in diesem Paket enthalten (mit der Endung .sample) und müssen an Ihre Station oder Ihren Repeater angepasst werden.
 
