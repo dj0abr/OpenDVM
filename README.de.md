@@ -119,26 +119,44 @@ Jetzt führe die fünf Scripts (alle mit `sudo`) wie folgt aus:
 👉 **Wichtig:**  
 Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
 
-1. **`install_serial.sh`**  
+1. **Installiere den seriellen Port**  
+   - Führe das Script aus:
+   ```bash
+   sudo ./install_serial.sh
+   ```
    - Erkennt Ihr serielles Gerät (USB, Onboard‑UART etc.) und lässt Sie das richtige auswählen
    - führen Sie dieses Skript erneut aus, um auf ein anderes Gerät zu wechseln (z. B. neue Hardware)
 
-2. **`install_mm.sh`**  
-   - Skript ausführen mit:
-     `sudo MMDVM_VID=0403 MMDVM_PID=6015 ./install_mm.sh` (Zahlen durch Ihre tatsächliche VID/PID ersetzen)
+2. **Installiere MMDVMHost**  
+   - Führe das Script aus:
+   ```bash
+   sudo ./install_mm.sh
+   ```
    - Installiert alle Systemabhängigkeiten  
    - Bereitet Verzeichnisse vor (z. B. `/var/log/mmdvm`)  
    - Richtet die MariaDB‑Datenbank ein  
    - Kompiliert und installiert das C++‑Backend  
    - Installiert die zentrale DV‑Schnittstelle **MMDVMHost**
 
-3. **`install_ysf.sh`**  
+3. **Installiere das YSF Gateway**  
+   - Führe das Script aus:
+   ```bash
+   sudo ./install_ysf.sh
+   ```
    - Installiert und konfiguriert das **System‑Fusion‑Gateway**
 
-4. **`install_irc.sh`**  
+4. **Installiere das D-Star Gateway**  
+   - Führe das Script aus:
+   ```bash
+   sudo ./install_irc.sh
+   ```
    - Installiert und konfiguriert das **D‑Star‑Gateway**
 
-5. **`install_dmr.sh`**  
+5. **Installiere das DMR Gateway**  
+   - Führe das Script aus:
+   ```bash
+   sudo ./install_dmr.sh
+   ```
    - Installiert und konfiguriert das **DMR‑Gateway**
 
 Nach Abschluss werden **Standard‑Konfigurationsdateien** automatisch nach `/etc` kopiert.  

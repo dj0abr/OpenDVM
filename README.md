@@ -120,26 +120,44 @@ Now run the five scripts (all with sudo) as follows:
 👉 **Important:**  
 These scripts must be executed **in this order**.
 
-1. **`install_serial.sh`**  
+1. **Install the serial port**  
+   - Run the script:
+   ```bash
+   sudo ./install_serial.sh
+   ```
    - Detects your serial device (USB, onboard UART, etc.), lets you pick the correct one
    - re-run this script to switch to a different device (e.g. a new hardware)s
 
-2. **`install_mm.sh`**  
-   - Run the script with:
-     `sudo MMDVM_VID=0403 MMDVM_PID=6015 ./install_mm.sh` (replace the numbers with your actual VID/PID)
+2. **Install the MMDVM Host**  
+   - Run the script:
+   ```bash
+   sudo ./install_mm.sh
+   ```
    - Installs all system dependencies  
    - Prepares directories (e.g., `/var/log/mmdvm`)  
    - Sets up the MariaDB database  
    - Compiles and installs the C++ backend  
    - Installs the central DV interface **MMDVMHost**
 
-3. **`install_ysf.sh`**  
+3. **Install the YSF Gateway**  
+   - Run the script:
+   ```bash
+   sudo ./install_ysf.sh
+   ```
    - Installs and configures the **System Fusion Gateway**
 
-4. **`install_irc.sh`**  
+4. **Install the D-Star Gateway**  
+   - Run the script:
+   ```bash
+   sudo ./install_irc.sh
+   ```
    - Installs and configures the **D-Star Gateway**
 
-5. **`install_dmr.sh`**  
+5. **Install the DMR Gateway**  
+   - Run the script:
+   ```bash
+   sudo ./install_dmr.sh
+   ```
    - Installs and configures the **DMR Gateway**
 
 After completion, **default configuration files** are automatically copied to `/etc`.  
