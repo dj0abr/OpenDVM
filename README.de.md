@@ -210,18 +210,13 @@ configs/site.conf.sample
    ```
    Das Programm liest Ihre `site.conf` und füllt alle Werte automatisch in folgende Konfigurationsdateien ein:
 
-   `
    /etc/MMDVMHost.ini
-
    /etc/ircddbgateway
-
    /etc/ysfgateway
-
    /etc/dmrgateway
-   `
 
    Vor jeder Änderung wird automatisch ein **Backup** erstellt:
-   
+
    `
    file.bak-YYYYMMDD-HHMMSS
    `
