@@ -1,3 +1,6 @@
+<!-- in README.md -->
+[🇬🇧 English](README.md) | [🇩🇪 Deutsch](README.de.md)
+
 # 🛰️ OpenDVM MultiMode Repeater for Debian/Linux
 
 This project builds upon the **Digital Voice (DV) modules by G4KLX**, which are combined into a complete solution like **Pi-Star**.  
