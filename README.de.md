@@ -1,6 +1,3 @@
-<!-- in README.de.md -->
-[🇬🇧 English](README.md) | [🇩🇪 Deutsch](README.de.md)
-
 # 🛰️ OpenDVM MultiMode Repeater für Debian/Linux
 
 Dieses Projekt baut auf den **Digital Voice (DV) Modulen von G4KLX** auf, die – ähnlich wie **Pi‑Star** – zu einer kompletten Lösung kombiniert werden.  
@@ -24,16 +21,16 @@ Dieses Projekt wurde ursprünglich für das MMDVM Repeater Builder Board entwick
 
 ---
 
-## 📖 Table of Contents
+## 📖 Inhaltsverzeichnis
 
-1. [Overview](#-overview)  
-2. [Architecture](#-architecture)  
-3. [Backend – Log Monitor & Database](#-backend--log-monitor--database)  
-4. [Installation & Dependencies](#-installation--dependencies)  
-5. [Configuration](#-configuration)  
-6. [Web Frontend](#-web-frontend)  
-7. [System Setup & Maintenance](#-system-setup--maintenance)  
-8. [Credits & License](#-credits--license)
+1. [Überblick](#-überblick)  
+2. [Architektur](#-architektur)  
+3. [Backend – Log‑Monitor & Datenbank](#-backend--log-monitor--datenbank)  
+4. [Installation & Abhängigkeiten](#-installation--abhängigkeiten)  
+5. [Konfiguration](#-konfiguration)  
+6. [Web-Frontend](#-web-frontend)  
+7. [Systemeinrichtung & Wartung](#-systemeinrichtung--wartung)  
+8. [Danksagungen & Lizenz](#-danksagungen--lizenz)
 
 ---
 
@@ -47,7 +44,7 @@ Dieses Projekt wurde ursprünglich für das MMDVM Repeater Builder Board entwick
 
 🔗 **Live‑Installation:** [digital.db0sl.de](https://digital.db0sl.de/)
 
-## 🔍 Overview
+## 🔍 Überblick
 
 **Hauptfunktionen:**
 
@@ -61,13 +58,13 @@ Dieses Projekt wurde ursprünglich für das MMDVM Repeater Builder Board entwick
 
 ---
 
-## ⚙️ Architecture
+## ⚙️ Architektur
 
 <img src="flowchart.png" alt="Systemübersicht" width="200">
 
 ---
 
-## 🧠 Backend – Log Monitor & Database
+## 🧠 Backend – Log‑Monitor & Datenbank
 
 Das Hauptprogramm überwacht kontinuierlich folgende Logdateien:
 
@@ -104,7 +101,7 @@ Neue Einträge werden sofort erkannt, geparst und in die Datenbank geschrieben.
 
 ---
 
-## 🧰 Installation & Dependencies
+## 🧰 Installation & Abhängigkeiten
 
 Die Installation erfolgt vollständig automatisiert über **fünf Shell‑Skripte**, die alle Abhängigkeiten, Programme und Konfigurationen installieren.
 
@@ -140,7 +137,7 @@ Sie müssen anschließend an Ihre Umgebung angepasst werden – siehe [Central C
 
 ---
 
-## 🧾 Configuration
+## 🧾 Konfiguration
 
 Alle Standort‑ und Systemparameter für die G4KLX‑Module werden in folgenden Konfigurationsdateien gespeichert:
 
@@ -209,7 +206,7 @@ configs/site.conf.sample
 
 ---
 
-## 🌐 Web Frontend
+## 🌐 Web-Frontend
 
 Das Web‑Frontend zeigt alle Betriebsdaten in Echtzeit an.  
 Vollständig statisch – kein PHP‑Framework erforderlich, nur ein kleines `api.php` für die JSON‑Ausgabe.
@@ -234,14 +231,14 @@ Vollständig statisch – kein PHP‑Framework erforderlich, nur ein kleines `ap
 
 ---
 
-## 🧱 System Setup & Maintenance
+## 🧱 Systemeinrichtung & Wartung
 
 - Datenbankzugriff über Unix‑Socket  
 - Installationsskripte legen Benutzer und Rechte automatisch an  
 
 ---
 
-## 🎯 Credits & License
+## 🎯 Danksagungen & Lizenz
 
 - Jonathan Naylor G4KLX für seine herausragenden DV‑Implementierungen, die die Grundlage dieses Projekts bilden  
 - Diese Software ist unter der **GPL v2** lizenziert und primär für den Amateurfunk sowie zu Ausbildungszwecken gedacht. Dieses Projekt enthält Komponenten von G4KLX unter GPL v2.  
