@@ -103,9 +103,12 @@ New entries are immediately detected, parsed, and written into the database.
 
 ## 🧰 Installation & Dependencies
 
-Installation is fully automated through **four shell scripts**, which install all dependencies, programs, and configuration files.
+Installation is fully automated through **five shell scripts**, which install all dependencies, programs, and configuration files.
 
 ### Installation Order
+
+👉 **Important:**  
+These scripts must be executed **in this order**.
 
 1. **`install_serial.sh`**  
    - Detects your serial device (USB, onboard UART, etc.), lets you pick the correct one
@@ -128,9 +131,6 @@ Installation is fully automated through **four shell scripts**, which install al
 
 5. **`install_dmr.sh`**  
    - Installs and configures the **DMR Gateway**
-
-👉 **Important:**  
-These scripts must be executed **in this order**.
 
 After completion, **default configuration files** are automatically copied to `/etc`.  
 They must then be adjusted to match your setup – see [Central Configuration & Config Renderer](#-central-configuration--config-renderer).
