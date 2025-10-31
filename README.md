@@ -162,7 +162,7 @@ These scripts must be executed **in this order**.
    - Installs and configures the **DMR Gateway**
 
 After completion, **default configuration files** are automatically copied to `/etc`.  
-They must then be adjusted to match your setup – see [Central Configuration & Config Renderer](#-central-configuration--config-renderer).
+They must then be adjusted to match your setup – see [Configuration](#-Configuration).
 
 ---
 
@@ -215,7 +215,7 @@ configs/site.conf.sample
    /etc/dmrgateway
 
    Before any modification, a **backup** is automatically created:
-   
+
    `
    file.bak-YYYYMMDD-HHMMSS
    `
