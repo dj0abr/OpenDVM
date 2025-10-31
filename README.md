@@ -107,7 +107,7 @@ Installation is fully automated through **four shell scripts**, which install al
 
 ### Installation Order
 
-1. ** find your Serial-USB adapter IDs **  
+1. **find your Serial-USB adapter IDs**  
    - Run `lsusb` in the terminal
    - Look for a line like:
      `Bus 002 Device 002: ID 0403:6015 Future Technology Devices International, Ltd Bridge` (yours may look slightly different)
