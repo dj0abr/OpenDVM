@@ -107,6 +107,13 @@ Neue Einträge werden sofort erkannt, geparst und in die Datenbank geschrieben.
 
 Die Installation erfolgt vollständig automatisiert über **fünf Shell‑Skripte**, die alle Abhängigkeiten, Programme und Konfigurationen installieren.
 
+Als erstes lade dieses Repository von Github herunter:
+```bash
+git clone https://github.com/dj0abr/OpenDVM.git
+```
+
+Jetzt führe die fünf Scripts (alle mit `sudo`) wie folgt aus:
+
 ### Installationsreihenfolge
 
 👉 **Wichtig:**  
