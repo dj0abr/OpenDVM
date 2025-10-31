@@ -689,7 +689,7 @@ static void printResult(const ParsedResult& r) {
 }
 
 
-static void printStatus(const std::map<std::string, OffsetEntry>& offsets,
+[[maybe_unused]] static void printStatus(const std::map<std::string, OffsetEntry>& offsets,
                         const std::map<std::string, uint64_t>& lastReadCounts) {
     std::cout << "\033[2K\r"; // Zeile löschen (TTY-freundlich)
     std::cout.flush();
