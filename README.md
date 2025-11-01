@@ -107,7 +107,7 @@ New entries are immediately detected, parsed, and written into the database.
 
 ### Serial Interface
 
-The following does NOT apply to USB-MMDVM boards.
+**The following does NOT apply to USB-MMDVM boards.**
 
 On a Pi 3/4 or 5, the onboard Bluetooth uses the primary PL011 UART by default. To free the GPIO UART for the MMDVM HAT, disable Bluetooth and enable the UART.
 
