@@ -81,7 +81,7 @@ sudo ./install_irc.sh
 sudo ./install_dmr.sh
 cd configs
 sudo cp site.conf.sample site.conf
-sudo nano site.conf
+sudo nano site.conf (enter your station's data)
 sudo ./render-config
 sudo reboot
 ```
