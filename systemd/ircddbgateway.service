@@ -13,6 +13,12 @@ WorkingDirectory=/var/log/ircddbgateway
 
 # sicherstellen, dass es existiert und dem User gehört
 ExecStartPre=/bin/rm -f /tmp/ircDDB_Gateway
+# altes Socket/Lock wegräumen
+ExecStartPre=/bin/rm -f /tmp/ircDDB_Gateway
+# Warten bis DNS-Name auflösbar ist (30x alle 2s)
+ExecStartPre=/bin/sh -c 'host="${IRCDDB_WAIT_HOST:-dns.xreflector.net}"; \
+  for i in $(seq 1 30); do getent hosts "$host" >/dev/null && exit 0; sleep 2; done; \
+  echo "DNS noch nicht verfügbar: $host" >&2; exit 1'
 
 # Daemon im Vordergrund laufen lassen (damit systemd ihn steuern kann)
 ExecStart=/usr/local/bin/ircddbgatewayd -logdir /var/log/ircddbgateway -foreground
