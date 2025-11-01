@@ -1,11 +1,13 @@
 [🇬🇧 English](README.md) | [🇩🇪 Deutsch](README.de.md)
 
-# 🛰️ OpenDVM MultiMode Repeater für Debian/Linux
+# 🛰️ OpenDVM MultiMode Repeater/Station für Debian/Linux
 
 Dieses Projekt baut auf den **Digital Voice (DV) Modulen von G4KLX** auf, die – ähnlich wie **Pi‑Star** – zu einer kompletten Lösung kombiniert werden.  
 Allerdings ist Pi‑Star **ausschließlich für den Raspberry Pi** ausgelegt.
 
-👉 **Ziel dieses Projekts** ist eine **voll funktionsfähige, plattformunabhängige Multimode‑Repeater‑Lösung**, die auf **jedem Debian‑basierten System** läuft – besonders zuverlässig auf echten PCs oder Servern (PC, Raspberry, Odroid, Orange Pi und viele weitere).
+👉 **Ziel dieses Projekts** ist eine **voll funktionsfähige, plattformunabhängige DV Multimode‑Lösung**, die auf **jedem Debian‑basierten System** läuft – besonders zuverlässig auf echten PCs oder Servern (PC, Raspberry, Odroid, Orange Pi und viele weitere).
+
+Die aktuelle Version unterstützt D-Star, DMR and YSF (C4FM) auf MMDVM Platinen (USB oder Aufsteckplatinen).
 
 Es nutzt folgende Repositories von G4KLX:
 
