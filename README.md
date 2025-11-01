@@ -19,7 +19,7 @@ The **entire installation** is automated through **five shell scripts** that cor
 Additionally, the project includes a **logfile parser** that reads all operational data from MMDVM, YSF, and DMR logs and writes them into a **MariaDB database**.  
 These data serve as the backend for a modern **web dashboard** that displays the repeater or hotspot status in real time.
 
-This project was originally developed for the MMDVM Repeater Builder Board used in the DB0SL Multimode Repeater. For other hardware or use cases, adjust the configuration files as needed (see the [Modem] section in MMDVMHost.ini)
+This project was originally developed for the MMDVM Repeater Builder board used in the DB0SL multimode repeater. It also runs with common MMDVM Raspberry Pi HATs. For other specialized hardware or use cases, adjust the configuration files as needed (see the [Modem] section in MMDVMHost.ini).
 
 ---
 
@@ -103,7 +103,7 @@ New entries are immediately detected, parsed, and written into the database.
 
 ---
 
-## Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)
+## 🍓 Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)
 
 On a Pi 3/4 or 5, the onboard Bluetooth uses the primary PL011 UART by default. To free the GPIO UART for the MMDVM HAT, disable Bluetooth and enable the UART.
 
@@ -121,6 +121,14 @@ On a Pi 3/4 or 5, the onboard Bluetooth uses the primary PL011 UART by default. 
    sudo systemctl disable --now bluetooth
    sudo reboot
    ```
+### Duplex
+
+There are two types of MMDVM HATs:
+
+Simplex: usually identifiable by a single antenna<br>
+Duplex: identifiable by two antennas or repeater boards
+
+The “Duplex” setting must match the hardware in use; otherwise, operation may only work in one direction.
 
 ## 🧰 Installation & Dependencies
 
