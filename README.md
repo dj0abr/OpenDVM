@@ -66,26 +66,6 @@ This project was originally developed for the MMDVM Repeater Builder Board used 
 
 ---
 
-## 🚀 Quick start for everyone who doesn’t want to read the manual
-
-On a fresh system (Debian-based: Ubuntu, Mint, Raspberry Pi, Odroid, …) run the following commands in order. But do yourself a favor and read the rest of the guide as well.
-
-```bash
-cd /opt
-sudo git clone https://github.com/dj0abr/OpenDVM.git
-cd OpenDVM
-sudo ./install_serial.sh
-sudo ./install_mm.sh
-sudo ./install_ysf.sh
-sudo ./install_irc.sh
-sudo ./install_dmr.sh
-cd configs
-sudo cp site.conf.sample site.conf
-sudo nano site.conf (enter your station's data)
-sudo ./render-config
-sudo reboot
-```
-
 ## 🧠 Backend – Log Monitor & Database
 
 The main program continuously monitors the following log files:
@@ -123,6 +103,25 @@ New entries are immediately detected, parsed, and written into the database.
 
 ---
 
+## Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)
+
+On a Pi 3/4 or 5, the onboard Bluetooth uses the primary PL011 UART by default. To free the GPIO UART for the MMDVM HAT, disable Bluetooth and enable the UART.
+
+### Steps
+
+1. **Edit the boot config**  
+   *(Bookworm and newer: `/boot/firmware/config.txt`; older releases: `/boot/config.txt`)*
+   ```ini
+   enable_uart=1
+   dtoverlay=pi3-disable-bt
+   ```
+
+2. **Disable Bluetooth and reboot:**
+   ```bash
+   sudo systemctl disable --now bluetooth
+   sudo reboot
+   ```
+
 ## 🧰 Installation & Dependencies
 
 Installation is fully automated through **five shell scripts**, which install all dependencies, programs, and configuration files.
@@ -143,6 +142,7 @@ Now run the five scripts (all with sudo) as follows:
 These scripts must be executed **in this order**.
 
 1. **Install the serial port**  
+   - If you’re using a Raspberry Pi with an MMDVM HAT, review the chapter “Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)” before continuing.
    - Run the script:
    ```bash
    sudo ./install_serial.sh

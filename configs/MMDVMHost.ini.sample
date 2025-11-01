@@ -38,7 +38,7 @@ File=/usr/local/etc/NXDN.csv
 Time=24
 
 [Modem]
-Port=/dev/mmdvm
+Port=/dev/null
 TXInvert=0
 RXInvert=1
 PTTInvert=0
@@ -62,7 +62,7 @@ Trace=0
 Debug=0
 Protocol=uart
 UARTPort=/dev/mmdvm
-UARTSpeed=460800
+UARTSpeed=115200
 POCSAGTXLevel=50
 FMTXLevel=50
 AX25TXLevel=50
@@ -76,7 +76,7 @@ LocalPort=40095
 
 [UMP]
 Enable=0
-Port=/dev/ttyACM1
+Port=/dev/null
 
 [D-Star]
 Enable=1
@@ -185,7 +185,7 @@ Protocol=Icom
 ModeHang=20
 
 [TFT Serial]
-Port=/dev/ttyAMA0
+Port=/dev/null
 Brightness=50
 
 [HD44780]
@@ -201,7 +201,7 @@ DisplayClock=1
 UTC=0
 
 [Nextion]
-Port=/dev/ttyAMA0
+Port=/dev/null
 Brightness=50
 DisplayClock=1
 UTC=0

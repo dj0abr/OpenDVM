@@ -66,26 +66,6 @@ Dieses Projekt wurde ursprünglich für das MMDVM Repeater Builder Board entwick
 
 ---
 
-## 🚀 Schnellstart für alle die keine Anleitung lesen wollen
-
-auf einem frischen System (Debian basiert, Ubuntu, Mint, Raspi, Odroid ...) gibt man der Reihe nach folgende Befehle ein. Aber tut euch den Gefallen und lest auch den Rest der Anleitung.
-
-```bash
-cd /opt
-sudo git clone https://github.com/dj0abr/OpenDVM.git
-cd OpenDVM
-sudo ./install_serial.sh
-sudo ./install_mm.sh
-sudo ./install_ysf.sh
-sudo ./install_irc.sh
-sudo ./install_dmr.sh
-cd configs
-sudo cp site.conf.sample site.conf
-sudo nano site.conf  (gebe die Daten deiner Station ein)
-sudo ./render-config
-sudo reboot
-```
-
 ## 🧠 Backend – Log‑Monitor & Datenbank
 
 Das Hauptprogramm überwacht kontinuierlich folgende Logdateien:
@@ -123,6 +103,25 @@ Neue Einträge werden sofort erkannt, geparst und in die Datenbank geschrieben.
 
 ---
 
+## Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)
+
+Auf einem Pi 3/4 oder 5 verwendet das eingebaute Bluetooth standardmäßig die primäre **PL011-UART**. Um die GPIO-UART für das **MMDVM-HAT** freizugeben, deaktiviere Bluetooth und aktiviere die UART.
+
+### Schritte
+
+1. **Boot-Konfiguration bearbeiten**  
+   *(Bookworm und neuer: `/boot/firmware/config.txt`; ältere Releases: `/boot/config.txt`)*
+   ```ini
+   enable_uart=1
+   dtoverlay=pi3-disable-bt
+   ```
+
+2. **Bluetooth deaktivieren und neu starten:**
+   ```bash
+   sudo systemctl disable --now bluetooth
+   sudo reboot
+   ```
+
 ## 🧰 Installation & Abhängigkeiten
 
 Die Installation erfolgt vollständig automatisiert über **fünf Shell‑Skripte**, die alle Abhängigkeiten, Programme und Konfigurationen installieren.
@@ -142,6 +141,7 @@ Jetzt führe die fünf Scripts (alle mit `sudo`) wie folgt aus:
 Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
 
 1. **Installiere den seriellen Port**  
+   - Wenn du einen Raspberry Pi mit MMDVM-HAT verwendest, lies zuerst das Kapitel „Raspberry Pi 3/4/5 MMDVM HAT (headless Raspberry Pi OS)“, bevor du weitermachst.
    - Führe das Script aus:
    ```bash
    sudo ./install_serial.sh
