@@ -14,7 +14,7 @@ Es nutzt folgende Repositories von G4KLX:
 - [DMRGateway](https://github.com/g4klx/DMRGateway)  
 - [YSFClient](https://github.com/g4klx/YSFClients) *(als Gateway verwendet)*  
 
-Die **gesamte Installation** wird über **vier Shell‑Skripte** automatisiert, die alle Komponenten korrekt einrichten.  
+Die **gesamte Installation** wird über **fünf Shell‑Skripte** automatisiert, die alle Komponenten korrekt einrichten.  
 
 Zusätzlich enthält das Projekt einen **Logfile‑Parser**, der alle Betriebsdaten aus den MMDVM‑, YSF‑ und DMR‑Logs einliest und in eine **MariaDB‑Datenbank** schreibt.  
 Diese Daten dienen als Backend für ein modernes **Web‑Dashboard**, das den Repeater‑ oder Hotspot‑Status in Echtzeit anzeigt.
