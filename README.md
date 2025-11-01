@@ -105,9 +105,11 @@ New entries are immediately detected, parsed, and written into the database.
 
 ## 🍓 Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)
 
-On a Pi 3/4 or 5, the onboard Bluetooth uses the primary PL011 UART by default. To free the GPIO UART for the MMDVM HAT, disable Bluetooth and enable the UART.
+### Serial Interface
 
-### Steps
+
+
+On a Pi 3/4 or 5, the onboard Bluetooth uses the primary PL011 UART by default. To free the GPIO UART for the MMDVM HAT, disable Bluetooth and enable the UART.
 
 1. **Edit the boot config**  
    *(Bookworm and newer: `/boot/firmware/config.txt`; older releases: `/boot/config.txt`)*

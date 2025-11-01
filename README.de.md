@@ -105,9 +105,11 @@ Neue Einträge werden sofort erkannt, geparst und in die Datenbank geschrieben.
 
 ## 🍓 Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)
 
-Auf einem Pi 3/4 oder 5 verwendet das eingebaute Bluetooth standardmäßig die primäre **PL011-UART**. Um die GPIO-UART für das **MMDVM-HAT** freizugeben, deaktiviere Bluetooth und aktiviere die UART.
+### serielle Schnittstelle
 
-### Schritte
+The following does NOT apply to USB-MMDVM boards.
+
+Auf einem Pi 3/4 oder 5 verwendet das eingebaute Bluetooth standardmäßig die primäre **PL011-UART**. Um die GPIO-UART für das **MMDVM-HAT** freizugeben, deaktiviere Bluetooth und aktiviere die UART.
 
 1. **Boot-Konfiguration bearbeiten**  
    *(Bookworm und neuer: `/boot/firmware/config.txt`; ältere Releases: `/boot/config.txt`)*
