@@ -107,7 +107,7 @@ Neue Einträge werden sofort erkannt, geparst und in die Datenbank geschrieben.
 
 ### serielle Schnittstelle
 
-The following does NOT apply to USB-MMDVM boards.
+Folgendes gilt NICHT für USB-MMDVM Platinen.
 
 Auf einem Pi 3/4 oder 5 verwendet das eingebaute Bluetooth standardmäßig die primäre **PL011-UART**. Um die GPIO-UART für das **MMDVM-HAT** freizugeben, deaktiviere Bluetooth und aktiviere die UART.
 
