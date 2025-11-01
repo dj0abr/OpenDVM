@@ -110,7 +110,8 @@ Installation is fully automated through **five shell scripts**, which install al
 First, download this repository from GitHub:
 
 ```bash
-git clone https://github.com/dj0abr/OpenDVM.git
+cd /opt
+sudo git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```
 
@@ -194,13 +195,13 @@ configs/site.conf.sample
 1. **Copy the template:**
    ```bash
    cd configs
-   cp site.conf.sample site.conf
+   sudo cp site.conf.sample site.conf
    ```
 
 2. **Edit the file:**
    Open `site.conf` in a text editor and enter your own data (e.g. callsign, DMR ID, frequencies, site location, Brandmeister credentials, etc.).
    ```bash
-   nano site.conf
+   sudo nano site.conf
    ```
 
 3. **Render the configuration:**

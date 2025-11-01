@@ -109,7 +109,8 @@ Die Installation erfolgt vollständig automatisiert über **fünf Shell‑Skript
 
 Als erstes lade dieses Repository von Github herunter:
 ```bash
-git clone https://github.com/dj0abr/OpenDVM.git
+cd /opt
+sudo git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```
 
@@ -193,13 +194,13 @@ configs/site.conf.sample
 1. **Vorlage kopieren:**
    ```bash
    cd configs
-   cp site.conf.sample site.conf
+   sudo cp site.conf.sample site.conf
    ```
 
 2. **Datei bearbeiten:**  
    Öffnen Sie `site.conf` in einem Editor und tragen Sie Ihre Daten ein (z. B. Rufzeichen, DMR‑ID, Frequenzen, Standort, BrandMeister‑Zugangsdaten usw.).
    ```bash
-   nano site.conf
+   sudo nano site.conf
    ```
 
 3. **Konfiguration rendern:**

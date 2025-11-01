@@ -6,8 +6,8 @@ After=network.target
 Type=simple
 User=mmdvm
 Group=mmdvm
-WorkingDirectory=/home/multimode/gui
-ExecStart=/home/multimode/gui/mmdvm-status /var/log/mmdvm
+WorkingDirectory=/usr/local/bin
+ExecStart=/usr/local/bin/mmdvm-status /var/log/mmdvm
 Restart=on-failure
 
 [Install]
