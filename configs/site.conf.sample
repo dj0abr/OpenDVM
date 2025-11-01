@@ -1,7 +1,7 @@
 # ./site.conf  (sample)
 # Required user settings (edit these, keep format KEY=VALUE)
 Callsign=YOURCALL       # Station/Repeater Callsign
-Module=B                # D-Star Module b=70cm
+Module=B                # D-Star Module B=70cm
 Id=123456               # DMR ID
 Duplex=1                # 1=Repeater 0=Station
 RXFrequency=431850000   # Hz
