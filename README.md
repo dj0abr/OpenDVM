@@ -160,7 +160,7 @@ These scripts must be executed **in this order**.
    sudo ./install_serial.sh
    ```
    - Detects your serial device (USB, onboard UART, etc.), lets you pick the correct one
-   - re-run this script to switch to a different device (e.g. a new hardware)s
+   - re-run this script to switch to a different device (e.g. a new hardware)
 
 2. **Install the MMDVM Host**  
    - Run the script:
