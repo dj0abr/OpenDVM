@@ -6,6 +6,7 @@ Wants=network-online.target
 [Service]
 User=mmdvm
 Group=mmdvm
+ExecStartPre=/bin/sleep 10
 ExecStart=/usr/local/bin/YSFGateway /etc/ysfgateway
 Restart=on-failure
 RestartSec=2
