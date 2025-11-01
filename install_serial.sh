@@ -2,7 +2,7 @@
 # serial port installation script by DJ0ABR
 set -euo pipefail
 
-if [[ "$(pwd -P)" != "/opt" ]]; then
+if [[ "$(pwd -P)" != "/opt/OpenDVM" ]]; then
   echo "Please clone the repo in directory: /opt" >&2
   exit 1
 fi
