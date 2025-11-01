@@ -68,7 +68,7 @@ Dieses Projekt wurde ursprünglich für das MMDVM Repeater Builder Board entwick
 
 ## 🚀 Schnellstart für alle die keine Anleitung lesen wollen
 
-auf einem frischen System (Debian basiert, Ubuntu, Mint, Raspi, Odroid ...) gibt man der Reihe nach folgende Befehle ein. Aber tut euch den Gefallen auch den Rest der Anleitung zu lesen.
+auf einem frischen System (Debian basiert, Ubuntu, Mint, Raspi, Odroid ...) gibt man der Reihe nach folgende Befehle ein. Aber tut euch den Gefallen und lest auch den Rest der Anleitung.
 
 ```bash
 cd /opt
