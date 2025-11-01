@@ -7,7 +7,7 @@ However, Pi-Star is designed **exclusively for the Raspberry Pi**.
 
 👉 **The goal of this project** is to create a **fully functional, platform-independent multimode DV solution** that runs on **any Debian-based system** – highly reliable on real PCs or servers (PC, Raspberry, Odroid, Orange Pi and many more).
 
-The current version supports D-Star, DMR and YSF (C4FM) on MMDVM Boards (USB Boards or HATs).
+The current version supports **D-Star, DMR and YSF (C4FM) on MMDVM Boards** (USB Boards or HATs).
 
 It uses the following G4KLX repositories:
 
