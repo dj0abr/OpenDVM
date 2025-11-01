@@ -56,16 +56,22 @@ struct TransmissionState {
     std::string openedLine; // zur Info
 };
 
+struct LocalConfig {
+    std::string callsign;
+    int duplex = 0; // 0=simplex (default), 1=duplex
+};
 
 // Liest das eigene Callsign aus /etc/MMDVMHost.ini
-static std::string readLocalCallsign() {
+// Liest Callsign und Duplex aus /etc/MMDVMHost.ini
+static LocalConfig readLocalConfig() {
     const std::string path = "/etc/MMDVMHost.ini";
     std::ifstream f(path);
     if (!f) {
-        dlog("[WARN] Kann ", path, " nicht öffnen – kein lokales Callsign bekannt");
-        return "";
+        dlog("[WARN] Kann ", path, " nicht öffnen – kein lokales Callsign/Duplex bekannt");
+        return {};
     }
 
+    LocalConfig cfg;
     std::string line;
     while (std::getline(f, line)) {
         if (line.rfind("Callsign=", 0) == 0) {
@@ -73,15 +79,29 @@ static std::string readLocalCallsign() {
             // trim whitespaces
             size_t a = cs.find_first_not_of(" \t\r\n");
             size_t b = cs.find_last_not_of(" \t\r\n");
-            if (a == std::string::npos) return "";
+            if (a == std::string::npos) continue;
             cs = cs.substr(a, b - a + 1);
-            dlog("[INFO] Lokales Callsign erkannt: ", cs);
-            return cs;
+            cfg.callsign = cs;
+            dlog("[INFO] Lokales Callsign erkannt: ", cfg.callsign);
+        } else if (line.rfind("Duplex=", 0) == 0) {
+            std::string dv = line.substr(std::strlen("Duplex="));
+            size_t a = dv.find_first_not_of(" \t\r\n");
+            size_t b = dv.find_last_not_of(" \t\r\n");
+            if (a == std::string::npos) continue;
+            dv = dv.substr(a, b - a + 1);
+            try {
+                cfg.duplex = std::stoi(dv);
+            } catch (...) {
+                cfg.duplex = 0;
+            }
+            dlog("[INFO] Duplex aus INI: ", cfg.duplex);
         }
     }
 
-    dlog("[WARN] Kein Callsign= in ", path, " gefunden");
-    return "";
+    if (cfg.callsign.empty())
+        dlog("[WARN] Kein Callsign= in ", path, " gefunden");
+    return cfg;
+    
 }
 
 // Ein gültiges Callsign muss mindestens zwei Buchstaben und eine Zahl enthalten.
@@ -240,8 +260,9 @@ static inline bool starts_with(const std::string& s, const char* pfx) {
 
 class LogParser {
 public:
-    explicit LogParser(const std::string& localCall = "")
-        : localCallsign(localCall) {
+    explicit LogParser(const LocalConfig& lc = {})
+        : localCallsign(lc.callsign),
+          ignoreSelfOnNET(lc.duplex == 1) {
         // --- D-Star ---
         rx.dstar_netStart = std::regex(R"(D-Star,\s+received\s+network\s+header\s+from\s+(\S+))");
         rx.dstar_netEnd   = std::regex(R"(D-Star,\s+received\s+network\s+end\s+of\s+transmission\s+from\s+(\S+).*?,\s*([\d.]+)\s+seconds,.*?BER:\s*([\d.]+)%)");
@@ -492,6 +513,7 @@ public:
 
 private:
     std::string localCallsign;
+    bool ignoreSelfOnNET = false;
 
     struct Regexes {
         // D-Star
@@ -564,6 +586,14 @@ private:
         return res;
     }
 
+    // Helper: Callsign säubern (Suffixe /<...> oder Spaces entfernen)
+    static std::string sanitizeCallsign(const std::string& in) {
+        std::string s = trim(in);
+        size_t p = s.find_first_of("/ ");
+        if (p != std::string::npos) s = s.substr(0, p);
+        return s;
+    }
+
     std::optional<ParsedResult>
     handleStart(const std::string& line,
                 const std::optional<std::chrono::system_clock::time_point>& ts,
@@ -571,7 +601,9 @@ private:
                 const std::string& source,
                 const std::string& callsign,
                 std::optional<int> dgId) {
-        if (!isValidCallsign(callsign)) return std::nullopt;
+                    
+        std::string cs = sanitizeCallsign(callsign);
+        if (!cs.empty() && !isValidCallsign(cs)) return std::nullopt;
 
         // ignore if it's our own callsign (with optional -suffix)
         auto isSelf = [&](const std::string& cs) -> bool {
@@ -579,7 +611,8 @@ private:
             if (cs.rfind(localCallsign, 0) == 0) return true; // beginnt mit eigenem Callsign
             return false;
         };
-        if (isSelf(callsign)) return std::nullopt;
+        // Nur Netzwerk-Echos unterdrücken – RF mit eigenem Call behalten
+        if (isSelf(cs) && source == "NET" && ignoreSelfOnNET) return std::nullopt;
 
         // Falls noch offen → zuerst erzwungen beenden
         std::optional<ParsedResult> priorEnd;
@@ -588,14 +621,14 @@ private:
         }
 
         auto stp = ts.value_or(std::chrono::system_clock::now());
-        open_ = TransmissionState{mode, source, callsign, dgId, stp, line};
+        open_ = TransmissionState{mode, source, cs, dgId, stp, line};
 
         ParsedResult res;
         res.originalLine = line;
         res.mode = mode;
         res.startEnd = "Start";
         res.source = source;
-        res.callsign = callsign;
+        res.callsign = cs;
         res.dgId = dgId;
         res.durationSec = std::nullopt;
         res.berPct = std::nullopt;
@@ -613,7 +646,9 @@ private:
             std::optional<int> dgId,
             std::optional<double> durationSec,
             std::optional<double> berPct) {
-        if (!isValidCallsign(callsign)) return std::nullopt;
+
+        std::string cs = sanitizeCallsign(callsign);
+        if (!cs.empty() && !isValidCallsign(cs)) return std::nullopt;
 
         // ignore if it's our own callsign (with optional -suffix)
         auto isSelf = [&](const std::string& cs) -> bool {
@@ -621,11 +656,11 @@ private:
             if (cs.rfind(localCallsign, 0) == 0) return true; // beginnt mit eigenem Callsign
             return false;
         };
-        if (isSelf(callsign)) return std::nullopt;
+        if (isSelf(cs) && source == "NET" && ignoreSelfOnNET) return std::nullopt;
 
         // Falls das Ende kein Rufzeichen/DG-ID liefert (z. B. YSF Watchdog),
         // nimm die Werte aus der offenen Übertragung, wenn vorhanden.
-        std::string outCallsign = callsign;
+        std::string outCallsign = cs;
         std::optional<int> outDgId = dgId;
 
         if (outCallsign.empty() && open_) {
@@ -1190,8 +1225,8 @@ int main(int argc, char** argv) {
     std::cerr.setf(std::ios::unitbuf);
 
     // Parser bleibt über die gesamte Laufzeit bestehen
-    std::string localCall = readLocalCallsign();
-    LogParser parser(localCall);
+    LocalConfig cfg = readLocalConfig();
+    LogParser parser(cfg);
     Database   db;
 
     // Argumente gemerkt: wenn keine angegeben sind, beobachten wir immer die heutigen Standardpfade
