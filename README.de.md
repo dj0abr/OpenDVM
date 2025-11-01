@@ -66,6 +66,26 @@ Dieses Projekt wurde ursprünglich für das MMDVM Repeater Builder Board entwick
 
 ---
 
+## 🚀 Schnellstart für alle die keine Anleitung lesen wollen
+
+auf einem frischen System (Debian basiert, Ubuntu, Mint, Raspi, Odroid ...) gibt man der Reihe nach folgende Befehle ein. Aber tut euch den Gefallen auch den Rest der Anleitung zu lesen.
+
+```bash
+cd /opt
+sudo git clone https://github.com/dj0abr/OpenDVM.git
+cd OpenDVM
+sudo ./install_serial.sh
+sudo ./install_mm.sh
+sudo ./install_ysf.sh
+sudo ./install_irc.sh
+sudo ./install_dmr.sh
+cd configs
+sudo cp site.conf.sample site.conf
+sudo nano site.conf
+sudo ./render-config
+sudo reboot
+```
+
 ## 🧠 Backend – Log‑Monitor & Datenbank
 
 Das Hauptprogramm überwacht kontinuierlich folgende Logdateien:
