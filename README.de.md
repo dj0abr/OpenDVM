@@ -5,7 +5,7 @@
 Dieses Projekt baut auf den **Digital Voice (DV) Modulen von G4KLX** auf, die – ähnlich wie **Pi‑Star** – zu einer kompletten Lösung kombiniert werden.  
 Allerdings ist Pi‑Star **ausschließlich für den Raspberry Pi** ausgelegt.
 
-👉 **Ziel dieses Projekts** ist eine **voll funktionsfähige, plattformunabhängige DV Multimode‑Lösung**, die auf **jedem Debian‑basierten System** läuft – besonders zuverlässig auf echten PCs oder Servern (PC, Raspberry, Odroid, Orange Pi und viele weitere).
+👉 **Ziel dieses Projekts** ist eine **voll funktionsfähige, plattformunabhängige DV Multimode‑Lösung**, die auf **jedem Debian‑basierten System** läuft – besonders zuverlässig auf echten PCs oder Servern (PC, virtuellen Maschinen, Raspberry, Odroid, Orange Pi und viele weitere).
 
 Die aktuelle Version unterstützt **D-Star, DMR and YSF (C4FM) auf MMDVM Platinen** (USB oder Aufsteckplatinen).
 
