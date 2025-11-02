@@ -5,6 +5,18 @@
     <title>OpenDVM Multimode</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="Cache-Control" content="no-store, must-revalidate" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+
     <style>
       :root {
         --bg: #0b0c10;
@@ -453,6 +465,18 @@
         justify-self: end;
         text-align: right;
       }
+      .map-wrap {
+        position: relative;
+        height: 360px; /* bei Bedarf anpassen */
+        width: 100%;
+      }
+      .map {
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        overflow: hidden;
+      }
+
     </style>
 
     <!-- Chart.js -->
@@ -465,17 +489,16 @@
   <body>
     <header>
       <div>
-        <h1>OpenDVM Multimode</h1>
-        <div class="subline">
+        <h1 id="title">OpenDVM Multimode</h1>
+        <div class="subline" id="subline">
           <b>OpenDVM</b> by DJ0ABR (DV modules by G4KLX)
           <a
+            id="repoLink"
             href="https://github.com/dj0abr/OpenDVM"
             target="_blank"
-            style="color:#acf8ff" 
+            style="color:#acf8ff"
             rel="noopener noreferrer"
-          >
-            https://github.com/dj0abr/OpenDVM
-          </a>
+          >https://github.com/dj0abr/OpenDVM</a>
         </div>
       </div>
     </header>
@@ -631,6 +654,16 @@
             <canvas id="callsignTop10DurationChart"></canvas>
           </div>
         </section>
+
+        <!-- Map / Standort -->
+        <section class="tile" style="grid-column: 1 / -1;">
+          <h2>Location</h2>
+          <div class="map-wrap">
+            <div id="map" class="map"></div>
+          </div>
+          <div id="mapMeta" class="subline" style="margin-top:8px"></div>
+        </section>
+
       </div>
     </main>
 
@@ -1533,7 +1566,139 @@
         }
       }
 
+      window.localcfg = null;
+
+      async function loadLocalConfig() {
+        try {
+          const r = await fetch("api.php?q=localconfig", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const d = await r.json();
+          // Optional: clientseitig ein paar Typen nach Number wandeln
+          if (d) {
+            if (d.duplex != null) d.duplex = Number(d.duplex);
+            if (d.rxfreq != null) d.rxfreq = Number(d.rxfreq);
+            if (d.txfreq != null) d.txfreq = Number(d.txfreq);
+            if (d.latitude != null) d.latitude = Number(d.latitude);
+            if (d.longitude != null) d.longitude = Number(d.longitude);
+          }
+          window.localcfg = d || {};
+          applyLocalHeader(window.localcfg);
+          applySublineFreqs(window.localcfg);
+          initOrUpdateMap(window.localcfg);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      function applyLocalHeader(d) {
+        const h1 = document.getElementById("title");
+        if (!h1 || !d) return;
+
+        const cs = sanitizeCallsign(d.callsign || "");
+        if (!cs) return; // wenn kein Callsign vorhanden, nichts ändern
+
+        const role = Number(d.duplex) === 1 ? "Repeater" : "Station";
+        h1.textContent = `${cs} OpenDVM Multimode ${role}`;
+      }
+
+      function fmtMHz(hz) {
+        const n = Number(hz);
+        if (!isFinite(n) || n <= 0) return "—";
+        return (n / 1e6).toFixed(3) + " MHz";
+      }
+
+      function applySublineFreqs(d) {
+        const sub = document.getElementById("subline");
+        const link = document.getElementById("repoLink");
+        if (!sub || !link || !d) return;
+
+        // bestehenden Frequenz-Span wiederverwenden/ersetzen
+        let span = document.getElementById("freqSpan");
+        const text = ` RX: ${fmtMHz(d.rxfreq)} TX: ${fmtMHz(d.txfreq)} `;
+
+        if (!span) {
+          span = document.createElement("span");
+          span.id = "freqSpan";
+          // ein bisschen optische Ruhe: gleiche Farbe wie Link
+          span.style.color = "#acf8ff";
+          // direkt vor den Link
+          sub.insertBefore(span, link);
+        }
+        span.textContent = text;
+      }
+
+      let map, mapLayer, mapMarker, mapCircle;
+
+      function fmtCoord(v, isLat) {
+        if (v == null || !isFinite(Number(v))) return "—";
+        const n = Number(v);
+        const hemi = isLat ? (n >= 0 ? "N" : "S") : (n >= 0 ? "E" : "W");
+        return Math.abs(n).toFixed(6) + "° " + hemi;
+      }
+
+      function initOrUpdateMap(d) {
+        const lat = Number(d?.latitude);
+        const lon = Number(d?.longitude);
+
+        const meta = document.getElementById("mapMeta");
+        if (!(isFinite(lat) && isFinite(lon))) {
+          if (meta) meta.textContent = "Kein Standort konfiguriert.";
+          return;
+        }
+
+        if (!map) {
+          map = L.map("map", {
+            zoomControl: true,
+            attributionControl: true,
+          });
+          mapLayer = L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+              maxZoom: 19,
+              attribution:
+                '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+            }
+          ).addTo(map);
+        }
+
+        const pos = [lat, lon];
+        map.setView(pos, 12);
+
+        if (!mapMarker) {
+          mapMarker = L.marker(pos).addTo(map);
+        } else {
+          mapMarker.setLatLng(pos);
+        }
+
+        // dezenter Range-Kreis (1 km) – gerne anpassen/entfernen
+        if (!mapCircle) {
+          mapCircle = L.circle(pos, { radius: 1000, opacity: 0.4, weight: 1, fillOpacity: 0.08 }).addTo(map);
+        } else {
+          mapCircle.setLatLng(pos);
+        }
+
+        const cs = sanitizeCallsign(d.callsign || "");
+        const role = Number(d.duplex) === 1 ? "Repeater" : "Station";
+        const popup = `<b>${cs || "—"}</b> · ${role}<br>${fmtCoord(lat, true)} · ${fmtCoord(lon, false)}`;
+        mapMarker.bindPopup(popup);
+
+        if (meta) {
+          const rx = fmtMHz(d.rxfreq);
+          const tx = fmtMHz(d.txfreq);
+          meta.textContent = `QTH: ${fmtCoord(lat, true)} · ${fmtCoord(lon, false)} · RX ${rx} · TX ${tx}`;
+        }
+
+        // Workaround: nach Render kurz Größe neu berechnen
+        setTimeout(() => map.invalidateSize(), 50);
+      }
+
+      // Bei Resize (mobil/Rotation): Karte neu layouten
+      window.addEventListener("resize", () => {
+        if (map) setTimeout(() => map.invalidateSize(), 100);
+      });
+
       // initial
+      loadLocalConfig();
       loadStatus();
       loadLastHeard();
       loadActivity();

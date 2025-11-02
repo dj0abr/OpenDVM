@@ -17,6 +17,7 @@ information into a mysql database
 #include <sstream>
 #include <iomanip>
 #include <locale>
+#include <cmath>
 #include <chrono>
 #include <vector>
 #include <filesystem>
@@ -58,11 +59,41 @@ struct TransmissionState {
 
 struct LocalConfig {
     std::string callsign;
-    int duplex = 0; // 0=simplex (default), 1=duplex
+    int         duplex = 0;                 // 0=simplex (default), 1=duplex
+    uint64_t    rxFrequency = 0;            // Hz, z.B. 431850000
+    uint64_t    txFrequency = 0;            // Hz, z.B. 439450000
+    double      latitude  = std::numeric_limits<double>::quiet_NaN();
+    double      longitude = std::numeric_limits<double>::quiet_NaN();
+    std::string location;                   // z.B. "myCity"
+    std::string description;                // z.B. "myCountry"
 };
 
-// Liest das eigene Callsign aus /etc/MMDVMHost.ini
+static inline std::optional<double> nullIfNaN(double v) {
+    return std::isnan(v) ? std::optional<double>{} : std::optional<double>{v};
+}
+
+static inline std::string trim(const std::string& s, bool strip_matching_quotes = false) {
+    // 1) Whitespace an beiden Seiten abschneiden (deine Logik)
+    size_t a = 0, b = s.size();
+    while (a < b && std::isspace((unsigned char)s[a])) ++a;
+    while (b > a && std::isspace((unsigned char)s[b-1])) --b;
+
+    std::string t = s.substr(a, b - a);
+
+    // 2) Optional: umschließende "…" oder '…' entfernen – nur wenn beide Seiten gleich sind
+    if (strip_matching_quotes && t.size() >= 2) {
+        char l = t.front();
+        char r = t.back();
+        if ((l == '"' && r == '"') || (l == '\'' && r == '\'')) {
+            t.erase(t.begin());         // vorne weg
+            t.pop_back();               // hinten weg
+        }
+    }
+    return t;
+}
+
 // Liest Callsign und Duplex aus /etc/MMDVMHost.ini
+// Liest Callsign, Duplex, RX/TX-Frequenzen, GPS und Location/Description aus /etc/MMDVMHost.ini
 static LocalConfig readLocalConfig() {
     const std::string path = "/etc/MMDVMHost.ini";
     std::ifstream f(path);
@@ -74,34 +105,65 @@ static LocalConfig readLocalConfig() {
     LocalConfig cfg;
     std::string line;
     while (std::getline(f, line)) {
-        if (line.rfind("Callsign=", 0) == 0) {
-            std::string cs = line.substr(std::strlen("Callsign="));
-            // trim whitespaces
-            size_t a = cs.find_first_not_of(" \t\r\n");
-            size_t b = cs.find_last_not_of(" \t\r\n");
-            if (a == std::string::npos) continue;
-            cs = cs.substr(a, b - a + 1);
-            cfg.callsign = cs;
-            dlog("[INFO] Lokales Callsign erkannt: ", cfg.callsign);
-        } else if (line.rfind("Duplex=", 0) == 0) {
-            std::string dv = line.substr(std::strlen("Duplex="));
-            size_t a = dv.find_first_not_of(" \t\r\n");
-            size_t b = dv.find_last_not_of(" \t\r\n");
-            if (a == std::string::npos) continue;
-            dv = dv.substr(a, b - a + 1);
-            try {
-                cfg.duplex = std::stoi(dv);
-            } catch (...) {
-                cfg.duplex = 0;
+        // Kommentare/Leerzeilen überspringen
+        std::string raw = trim(line);
+        if (raw.empty() || raw[0] == '#' || raw[0] == ';' || raw[0] == '[') continue;
+
+        auto handle = [&](const char* key) -> std::optional<std::string> {
+            const size_t len = std::strlen(key);
+            if (raw.rfind(key, 0) == 0) {
+                return trim(raw.substr(len));
             }
+            return std::nullopt;
+        };
+
+        if (auto v = handle("Callsign=")) {
+            if (cfg.callsign.empty()) {              // << nur erstes Vorkommen übernehmen
+                cfg.callsign = *v;
+                dlog("[INFO] Lokales Callsign erkannt: ", cfg.callsign);
+            }
+            continue;
+        }
+        if (auto v = handle("Duplex=")) {
+            try { cfg.duplex = std::stoi(*v); } catch (...) { cfg.duplex = 0; }
             dlog("[INFO] Duplex aus INI: ", cfg.duplex);
+            continue;
+        }
+        if (auto v = handle("RXFrequency=")) {
+            try { cfg.rxFrequency = std::stoull(*v); } catch (...) { cfg.rxFrequency = 0; }
+            dlog("[INFO] RXFrequency: ", cfg.rxFrequency);
+            continue;
+        }
+        if (auto v = handle("TXFrequency=")) {
+            try { cfg.txFrequency = std::stoull(*v); } catch (...) { cfg.txFrequency = 0; }
+            dlog("[INFO] TXFrequency: ", cfg.txFrequency);
+            continue;
+        }
+        if (auto v = handle("Latitude=")) {
+            try { cfg.latitude = std::stod(*v); } catch (...) { cfg.latitude = std::numeric_limits<double>::quiet_NaN(); }
+            dlog("[INFO] Latitude: ", cfg.latitude);
+            continue;
+        }
+        if (auto v = handle("Longitude=")) {
+            try { cfg.longitude = std::stod(*v); } catch (...) { cfg.longitude = std::numeric_limits<double>::quiet_NaN(); }
+            dlog("[INFO] Longitude: ", cfg.longitude);
+            continue;
+        }
+        if (auto v = handle("Location=")) {
+            cfg.location = trim(*v, true);
+            dlog("[INFO] Location: ", cfg.location);
+            continue;
+        }
+        if (auto v = handle("Description=")) {
+            cfg.description = trim(*v, true);
+            dlog("[INFO] Description: ", cfg.description);
+            continue;
         }
     }
 
     if (cfg.callsign.empty())
         dlog("[WARN] Kein Callsign= in ", path, " gefunden");
     return cfg;
-    
 }
 
 // Ein gültiges Callsign muss mindestens zwei Buchstaben und eine Zahl enthalten.
@@ -246,12 +308,6 @@ static std::vector<std::string> defaultLogPaths() {
     return out;
 }
 
-static inline std::string trim(const std::string& s) {
-    size_t a = 0, b = s.size();
-    while (a < b && std::isspace((unsigned char)s[a])) ++a;
-    while (b > a && std::isspace((unsigned char)s[b-1])) --b;
-    return s.substr(a, b - a);
-}
 
 static inline bool starts_with(const std::string& s, const char* pfx) {
     size_t n = std::strlen(pfx);
@@ -754,7 +810,9 @@ public:
       port(0), unix_socket("/run/mysqld/mysqld.sock"),
       conn(nullptr),
       st_upsert_status(nullptr), st_insert_lastheard(nullptr),
-      st_upsert_reflector_dstar(nullptr), st_upsert_reflector_fusion(nullptr), st_upsert_reflector_dmr(nullptr) {
+      st_upsert_reflector_dstar(nullptr), st_upsert_reflector_fusion(nullptr), st_upsert_reflector_dmr(nullptr),
+      st_upsert_localconfig(nullptr)
+       {
     }
 
     ~Database() {
@@ -814,6 +872,54 @@ public:
         if (mysql_stmt_execute(st_upsert_status) != 0) {
             dlog("[DB  ] exec upsert status failed: ", mysql_stmt_error(st_upsert_status));
         }
+    }
+
+    void upsertLocalConfig(const LocalConfig& lc) {
+        if (!ensure_conn() || !st_upsert_localconfig) return;
+
+        // Bind-Reihenfolge wie im SQL: callsign, duplex, rxfreq, txfreq, latitude, longitude, location, description
+        MYSQL_BIND b[9]{}; // 9 inkl. id im SQL (fest), wir binden 8 + null-terminations-handling
+
+        // callsign
+        Scratch s_callsign(lc.callsign);
+        b[0] = s_callsign.bind_str();
+
+        // duplex (TINYINT)
+        signed char duplex = static_cast<signed char>(lc.duplex);
+        b[1].buffer_type = MYSQL_TYPE_TINY;
+        b[1].buffer = &duplex;
+
+        // rxfreq / txfreq (BIGINT UNSIGNED -> wir binden als LONGLONG)
+        unsigned long long rxf = lc.rxFrequency;
+        unsigned long long txf = lc.txFrequency;
+        b[2].buffer_type = MYSQL_TYPE_LONGLONG; b[2].buffer = &rxf; b[2].is_unsigned = 1;
+        b[3].buffer_type = MYSQL_TYPE_LONGLONG; b[3].buffer = &txf; b[3].is_unsigned = 1;
+
+        // latitude / longitude (nullable double bei NaN)
+        NullableDouble nlat(nullIfNaN(lc.latitude));
+        NullableDouble nlon(nullIfNaN(lc.longitude));
+        b[4] = nlat.bind_double();
+        b[5] = nlon.bind_double();
+
+        // location / description (nullable string bei leer)
+        bool has_loc = !lc.location.empty();
+        bool has_desc = !lc.description.empty();
+        Scratch s_loc(lc.location);
+        Scratch s_desc(lc.description);
+        NullableStr nsloc(has_loc);
+        NullableStr nsdesc(has_desc);
+        b[6] = nsloc.bind_str(s_loc);
+        b[7] = nsdesc.bind_str(s_desc);
+
+        if (mysql_stmt_bind_param(st_upsert_localconfig, b) != 0) {
+            dlog("[DB  ] bind upsert localconfig failed: ", mysql_stmt_error(st_upsert_localconfig));
+            return;
+        }
+        if (mysql_stmt_execute(st_upsert_localconfig) != 0) {
+            dlog("[DB  ] exec upsert localconfig failed: ", mysql_stmt_error(st_upsert_localconfig));
+            return;
+        }
+        dlog("[DB  ] localconfig upserted");
     }
 
     void insertLastHeard(const std::string& callsign,
@@ -910,6 +1016,7 @@ private:
     MYSQL* conn;
     MYSQL_STMT *st_upsert_status, *st_insert_lastheard;
     MYSQL_STMT *st_upsert_reflector_dstar, *st_upsert_reflector_fusion, *st_upsert_reflector_dmr;
+    MYSQL_STMT *st_upsert_localconfig;
 
     // ---- Verbindungsaufbau + Statements (deine Snippets) ----
     bool connect() {
@@ -973,6 +1080,21 @@ private:
             " updated_at DATETIME"
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         if (mysql_query(conn, q3) != 0) dlog("[DB  ] create reflector failed: ", mysql_error(conn));
+
+        const char* q4 =
+            "CREATE TABLE IF NOT EXISTS localconfig ("
+            " id TINYINT PRIMARY KEY,"
+            " callsign VARCHAR(20),"
+            " duplex TINYINT,"
+            " rxfreq BIGINT UNSIGNED,"
+            " txfreq BIGINT UNSIGNED,"
+            " latitude DOUBLE NULL,"
+            " longitude DOUBLE NULL,"
+            " location VARCHAR(64) NULL,"
+            " description VARCHAR(128) NULL,"
+            " updated_at DATETIME"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+        if (mysql_query(conn, q4) != 0) dlog("[DB  ] create localconfig failed: ", mysql_error(conn));
 
         mysql_query(conn, "INSERT IGNORE INTO reflector (id,dstar,dmr,fusion,updated_at) "
                           "VALUES (1,NULL,NULL,NULL,NOW());");
@@ -1047,6 +1169,22 @@ private:
             dlog("[DB  ] prepare upsert reflector.dmr failed: ", mysql_error(conn));
             destroy_statements();
         }
+
+        const char* ps6 =
+            "INSERT INTO localconfig "
+            " (id, callsign, duplex, rxfreq, txfreq, latitude, longitude, location, description, updated_at) "
+            "VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, NOW()) "
+            "ON DUPLICATE KEY UPDATE "
+            " callsign=VALUES(callsign), duplex=VALUES(duplex), rxfreq=VALUES(rxfreq), txfreq=VALUES(txfreq),"
+            " latitude=VALUES(latitude), longitude=VALUES(longitude),"
+            " location=VALUES(location), description=VALUES(description), updated_at=NOW();";
+
+        st_upsert_localconfig = mysql_stmt_init(conn);
+        if (!st_upsert_localconfig ||
+            mysql_stmt_prepare(st_upsert_localconfig, ps6, (unsigned long)strlen(ps6)) != 0) {
+            dlog("[DB  ] prepare upsert localconfig failed: ", mysql_error(conn));
+            destroy_statements();
+        }
     }
 
     void destroy_statements() {
@@ -1055,6 +1193,7 @@ private:
         if (st_upsert_reflector_dstar) { mysql_stmt_close(st_upsert_reflector_dstar); st_upsert_reflector_dstar = nullptr; }
         if (st_upsert_reflector_fusion) { mysql_stmt_close(st_upsert_reflector_fusion); st_upsert_reflector_fusion = nullptr; }
         if (st_upsert_reflector_dmr) { mysql_stmt_close(st_upsert_reflector_dmr); st_upsert_reflector_dmr = nullptr; }
+        if (st_upsert_localconfig) { mysql_stmt_close(st_upsert_localconfig); st_upsert_localconfig = nullptr; }
     }
 
     // ---- Helpers für Binds ----
@@ -1228,6 +1367,7 @@ int main(int argc, char** argv) {
     LocalConfig cfg = readLocalConfig();
     LogParser parser(cfg);
     Database   db;
+    db.upsertLocalConfig(cfg);
 
     // Argumente gemerkt: wenn keine angegeben sind, beobachten wir immer die heutigen Standardpfade
     std::vector<std::string> argPaths;

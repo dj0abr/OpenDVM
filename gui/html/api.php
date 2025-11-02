@@ -405,6 +405,30 @@ try {
     exit;
   }
 
+  /* =========================
+    LocalConfig (Einzelzeile)
+    ========================= */
+  if ($q === 'localconfig') {
+    $row = $pdo->query("
+      SELECT
+        callsign,
+        duplex,
+        rxfreq,
+        txfreq,
+        latitude,
+        longitude,
+        location,
+        description,
+        DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at
+      FROM localconfig
+      WHERE id = 1
+      LIMIT 1
+    ")->fetch();
+
+    echo json_encode($row ?: [], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+
   // Fallback: unbekannter q-Parameter
   http_response_code(400);
   echo json_encode(['error' => 'bad query'], JSON_UNESCAPED_UNICODE);
