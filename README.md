@@ -142,7 +142,7 @@ Installation is fully automated through **two shell scripts**, which install all
 First, download this repository from GitHub:
 
 ```bash
-sudo git clone https://github.com/dj0abr/OpenDVM.git
+git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```
 
