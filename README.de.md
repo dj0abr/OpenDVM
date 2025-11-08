@@ -193,7 +193,7 @@ Alle standort- und systembezogenen Parameter für die G4KLX-Module werden in fol
    /etc/ysfgateway  
    /etc/dmrgateway
 
-Beispieldateien sind im Paket enthalten (mit der Endung `.sample`) und müssen für die eigene Station angepasst werden.
+Beispieldateien sind im Paket enthalten und müssen für die eigene Station angepasst werden.
 
 Diese Dateien enthalten alle standortspezifischen Einstellungen wie Rufzeichen, Frequenzen, Koordinaten und Netzparameter.
 

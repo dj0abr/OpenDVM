@@ -190,7 +190,7 @@ All site and system parameters for the G4KLX modules are stored in the following
    /etc/ysfgateway  
    /etc/dmrgateway
 
-Sample versions of these files are included in this package (with a .sample extension) and must be customized to match your station or repeater setup.
+Sample versions of these files are included in this package and must be customized to match your station or repeater setup.
 
 This file contains all site-specific settings such as callsign, frequencies, coordinates, and network parameters.
 
