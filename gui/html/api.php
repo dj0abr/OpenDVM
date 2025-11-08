@@ -405,7 +405,7 @@ try {
     exit;
   }
 
-  /* =========================
+    /* =========================
     LocalConfig (Einzelzeile)
     ========================= */
   if ($q === 'localconfig') {
@@ -420,11 +420,62 @@ try {
         location,
         description,
         DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at
-      FROM localconfig
-      WHERE id = 1
+      FROM config_inbox
+      LIMIT 1
+    ")->fetch(PDO::FETCH_ASSOC);
+
+    echo json_encode($row ?: [], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+
+  /* =========================
+   Config Inbox (single row)
+   ========================= */
+  if ($q === 'config_inbox') {
+    $row = $pdo->query("
+      SELECT
+        callsign       AS Callsign,
+        module         AS Module,
+        dmr_id         AS Id,
+        duplex         AS Duplex,
+        rxfreq         AS RXFrequency,
+        txfreq         AS TXFrequency,
+        latitude       AS Latitude,
+        longitude      AS Longitude,
+        height         AS Height,
+        location       AS Location,
+        description    AS Description,
+        url            AS URL,
+        reflector1     AS _reflector_raw,
+        ysf_suffix     AS Suffix,
+        ysf_startup    AS Startup,
+        ysf_options    AS Options,
+        dmr_address    AS Address,
+        dmr_password   AS Password,
+        dmr_name       AS Name,
+        is_new         AS is_new,
+        DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at
+      FROM config_inbox
+      WHERE id=1
       LIMIT 1
     ")->fetch();
 
+    if ($row) {
+      // Split "DCS001 R" / "DCS001R" → base + module
+      $raw = strtoupper(trim((string)($row['_reflector_raw'] ?? '')));
+      $raw = preg_replace('/\s+/', ' ', $raw);
+      $base = $raw; $mod = null;
+      if (preg_match('/^([A-Z]+[0-9]+)\s*([A-Z])?$/', $raw, $m)) {
+        $base = $m[1];
+        $mod  = $m[2] ?? null;
+      }
+      $fallbackMod = strtoupper(substr((string)($row['Module'] ?? 'B'), 0, 1));
+      $row['reflector1'] = $base;
+      $row['reflector_module'] = $mod ?: $fallbackMod;
+
+      unset($row['_reflector_raw']);
+    }
+      
     echo json_encode($row ?: [], JSON_UNESCAPED_UNICODE);
     exit;
   }

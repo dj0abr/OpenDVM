@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>OpenDVM – Configuration</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store, must-revalidate" />
+
+  <style>
+    :root{
+      --bg:#0b0c10; --fg:#eaf0f1; --muted:#9aa3a7; --border:#1a1f24;
+      --tile:#222831; --tile-alt:#1d232c; --ok:#28a745; --warn:#e5a70a; --err:#e5484d;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; color:var(--fg);
+      background:linear-gradient(180deg,#0b0c10,#0f1419 260px);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Open Sans","Helvetica Neue",Arial,sans-serif;
+    }
+    header{
+      position:sticky; top:0; backdrop-filter:blur(8px); background:#0006;
+      border-bottom:1px solid var(--border); padding:18px 20px; text-align:center;
+    }
+    header h1{margin:0; font-size:28px; letter-spacing:.2px}
+    main{max-width:980px; margin:0 auto; padding:20px}
+    .grid{display:grid; gap:18px; grid-template-columns:1fr 1fr}
+    @media (max-width:740px){.grid{grid-template-columns:1fr}}
+    .tile{
+      background:var(--tile); border:1px solid var(--border); border-radius:16px;
+      padding:18px 20px; box-shadow:0 1px 0 #0004 inset;
+    }
+    .tile h2{
+      margin:0 0 14px 0; font-size:12px; text-transform:uppercase;
+      letter-spacing:.12em; color:var(--muted);
+    }
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+    .row + .row{margin-top:12px}
+    @media (max-width:740px){.row{grid-template-columns:1fr}}
+    .field{display:flex; flex-direction:column; gap:8px}
+    label{font-size:13px; color:var(--muted)}
+    input, select{
+      width:100%; padding:12px 12px; border-radius:10px; border:1px solid var(--border);
+      background:var(--tile-alt); color:var(--fg); font-size:15px; outline:none;
+    }
+    input:focus, select:focus{border-color:#2ea6ff; box-shadow:0 0 0 3px #2ea6ff22}
+    .hint{font-size:12px; color:var(--muted)}
+    button{
+      border:1px solid var(--border); background:var(--tile-alt); color:var(--fg);
+      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600;
+    }
+    button.primary{background:#2a3440; border-color:#365068}
+    button.primary:hover{filter:brightness(1.08)}
+    .badge{display:inline-block; border:1px solid var(--border); background:var(--tile-alt);
+      color:var(--muted); border-radius:999px; padding:2px 8px; font-size:12px}
+    .footer-note{color:var(--muted); font-size:12px; text-align:center; padding:12px}
+    .error{color:var(--err); font-size:13px; margin-top:6px}
+    .ok{color:var(--ok); font-size:13px; margin-top:6px}
+    .center{grid-column:1 / -1}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+    .snackbar{
+      position:fixed; left:50%; transform:translateX(-50%); bottom:20px;
+      background:#141a20; border:1px solid var(--border); color:var(--fg);
+      padding:10px 14px; border-radius:12px; display:none; z-index:9999;
+    }
+    .actions-wrap {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+    .actions-right {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .pw-inline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .pw-toggle {
+      border: 1px solid var(--border);
+      background: var(--tile-alt);
+      color: var(--fg);
+      padding: 8px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .pw-toggle:active { transform: translateY(1px); }
+    /* Akzentfarben je Kachel */
+    .tile.station { --accent: #5cc8ff; }   /* hellblau */
+    .tile.location{ --accent: #ffd166; }   /* amber */
+    .tile.dstar   { --accent: #64a8ff; }   /* blau */
+    .tile.ysf     { --accent: #b889f4; }   /* lila */
+    .tile.dmr     { --accent: #3ddc97; }   /* grün */
+    .tile.actions-tile { --accent: #e5484d; }
+
+    /* linke Akzent-Leiste an jeder Kachel */
+    .tile { position: relative; }
+    .tile::before{
+      content:"";
+      position:absolute; inset:0 auto 0 0; width:4px;
+      background: var(--accent, transparent);
+      border-radius: 16px 0 0 16px;
+      opacity:.9;
+    }
+
+    /* Überschriften mit Icon davor */
+    .tile h2{
+      display:flex; align-items:center; gap:8px;
+    }
+    .tile.station  h2::before{content:"🛰️";}
+    .tile.location h2::before{content:"📍";}
+    .tile.dstar    h2::before{content:"✳️";}
+    .tile.ysf      h2::before{content:"🟦";}
+    .tile.dmr      h2::before{content:"📡";}
+    .tile.actions-tile h2::before { content: "⚙️"; }
+
+    /* Buttons etwas „saftiger“ */
+    button.primary{
+      background: linear-gradient(180deg, #2a3440, #1f2832);
+      border-color:#365068;
+      box-shadow: 0 0 0 0 rgba(0,0,0,0), 0 8px 20px #0005 inset;
+    }
+    button.primary:hover{ filter:none; transform: translateY(-1px); }
+    button.primary:active{ transform: translateY(0); }
+
+    /* Inputs mit feinem Akzent-Schein beim Fokus */
+    input:focus, select:focus{
+      border-color: var(--accent, #2ea6ff);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent, #2ea6ff) 30%, transparent);
+    }
+
+    /* Badges: kleine farbige Status-Pille optional */
+    .badge{
+      position: relative; padding-left: 18px;
+    }
+    .badge::before{
+      content:""; width:8px; height:8px; border-radius:50%;
+      position:absolute; left:6px; top:50%; transform:translateY(-50%);
+      background: var(--accent, #9aa3a7);
+    }
+
+    /* Snackbar mit Emoji je nach Status (per Klasse .ok/.error) */
+    .snackbar.ok::before   { content:"✅ "; }
+    .snackbar.error::before{ content:"⚠️ "; }
+    a.hint { color: var(--muted); text-decoration: none; font-size: 12px; }
+    a.hint:hover { text-decoration: underline; }
+
+    /* === HERVORHEBUNG FÜR DEFAULT-WERTE === */
+    input.is-default {
+      background: color-mix(in oklab, var(--err) 15%, var(--tile-alt));
+      border-color: var(--err);
+    }
+    input.is-default:focus {
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--err) 30%, transparent);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>OpenDVM – Configuration</h1>
+    <div class="hint">Latitude/Longitude accept comma <b>,</b> or dot <b>.</b>. Frequency fields are integer Hz.</div>
+  </header>
+
+  <main>
+    <form id="cfgForm" class="grid" novalidate>
+      <!-- TILE: STATION -->
+      <section class="tile center station">
+        <h2>Station</h2>
+        <div class="row">
+          <div class="field">
+            <label for="Callsign">Callsign</label>
+            <input id="Callsign" name="Callsign" class="mono"
+              required pattern="^[A-Za-z0-9/]{3,}$" placeholder="YOUR_CALL" value="YOUR_CALL" />
+            <div class="hint">Station/Repeater callsign</div>
+          </div>
+          <div class="field">
+            <label for="Module">Module</label>
+            <select id="Module" name="Module">
+              <option value="A">A (23cm)</option>
+              <option value="B" selected>B (70cm)</option>
+              <option value="C">C (2m)</option>
+            </select>
+            <div class="hint">D-Star module</div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="Id">DMR ID</label>
+            <input id="Id" name="Id" type="number" inputmode="numeric" min="1" class="mono" value="123456" required />
+            <a class="hint" href="https://radioid.net/database" target="_blank" rel="noopener">
+              https://radioid.net/database
+            </a>
+          </div>
+          <div class="field">
+            <label for="Duplex">Duplex</label>
+            <select id="Duplex" name="Duplex">
+              <option value="1" selected>1 = Repeater</option>
+              <option value="0">0 = Station/Hotspot</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="RXFrequency">RXFrequency (Hz)</label>
+            <input id="RXFrequency" name="RXFrequency" type="number" inputmode="numeric" class="mono"
+              required min="1000000" step="1" value="431850000" />
+            <div class="hint">use different RX/TX frequencies if possible</div>
+          </div>
+          <div class="field">
+            <label for="TXFrequency">TXFrequency (Hz)</label>
+            <input id="TXFrequency" name="TXFrequency" type="number" inputmode="numeric" class="mono"
+              required min="1000000" step="1" value="439450000" />
+          </div>
+        </div>
+      </section>
+
+      <!-- TILE: LOCATION -->
+      <section class="tile center location">
+        <h2>Location</h2>
+        <div class="row">
+          <div class="field">
+            <label for="Latitude">Latitude</label>
+            <input id="Latitude" name="Latitude" type="text" inputmode="decimal" class="mono" value="49,123456" required />
+            <div class="hint">Decimal with “,” or “.”</div>
+          </div>
+          <div class="field">
+            <label for="Longitude">Longitude</label>
+            <input id="Longitude" name="Longitude" type="text" inputmode="decimal" class="mono" value="11.123456" required />
+            <div class="hint">Decimal with “,” or “.”</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="Height">Height (ASL)</label>
+            <input id="Height" name="Height" type="number" step="1" class="mono" value="123" />
+          </div>
+          <div class="field">
+            <label for="Location">Location (City)</label>
+            <input id="Location" name="Location" placeholder="City" value="City" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="Description">Description (Country)</label>
+            <input id="Description" name="Description" placeholder="Country" value="Country" />
+          </div>
+          <div class="field">
+            <label for="URL">URL (optional)</label>
+            <input id="URL" name="URL" type="text" placeholder="www.yourURL.de" value="http://www.yourURL.de" />
+          </div>
+        </div>
+      </section>
+
+      <!-- TILE: D-Star -->
+      <section class="tile dstar">
+        <h2>D-Star</h2>
+        <div class="row">
+          <div class="field">
+            <label for="reflector1">reflector1</label>
+            <input id="reflector1" name="reflector1" class="mono" value="DCS001" required />
+            <div class="hint">e.g. DCS001, REF001, XRF001</div>
+          </div>
+          <div class="field">
+            <label for="reflector_module">reflector_module</label>
+            <select id="reflector_module" name="reflector_module"></select>
+          </div>
+        </div>
+      </section>
+
+      <!-- TILE: YSF -->
+      <section class="tile ysf">
+        <h2>YSF</h2>
+        <div class="row">
+          <div class="field">
+            <label for="Suffix">Suffix</label>
+            <input id="Suffix" name="Suffix" class="mono" maxlength="4" value="Y" />
+            <div class="hint">YSF suffix</div>
+          </div>
+          <div class="field">
+            <label for="Startup">Startup</label>
+            <input id="Startup" name="Startup" class="mono" value="DE-C4FM-Germany" />
+            <div class="hint">Default YSF reflector</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="Options">DG-IDs</label>
+            <input id="Options" name="Options" class="mono" placeholder="32,88" />
+            <div class="hint">connect to these Digital Groups</div>
+          </div>
+          <div class="field"></div>
+        </div>
+      </section>
+
+      <!-- TILE: DMR -->
+      <section class="tile center dmr">
+        <h2>DMR</h2>
+        <div class="row">
+          <div class="field">
+            <label for="Address">Address</label>
+            <input id="Address" name="Address" class="mono" value="2621.master.brandmeister.network" required />
+            <div class="hint">Default BrandMeister server</div>
+          </div>
+          <div class="field">
+            <label for="Password">Password</label>
+            <input id="Password" name="Password" type="password" class="mono" value="BMpassword" />
+            <div class="hint">BrandMeister password</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="Name">Name</label>
+            <input id="Name" name="Name" class="mono" value="BM_2621_Germany" />
+            <div class="hint">Alias for BrandMeister server, enter any text</div>
+          </div>
+          <div class="field"></div>
+        </div>
+      </section>
+
+      <!-- TILE: ACTIONS -->
+      <section class="tile center actions-tile">
+        <h2>Actions</h2>
+
+        <div class="actions-wrap">
+          <!-- Links: Passwortfeld -->
+          <div class="field">
+            <label for="ConfigPassword">Config Password</label>
+            <div class="pw-inline">
+              <input id="ConfigPassword" name="ConfigPassword" type="password" class="mono"
+                    placeholder="••••••••" autocomplete="new-password" />
+              <button type="button" id="togglePw" class="pw-toggle" aria-controls="ConfigPassword" aria-pressed="false">
+                Show
+              </button>
+            </div>
+            <div class="hint">enter configuration password</div>
+          </div>
+
+          <!-- Rechts: Status + Buttons -->
+          <div class="actions-right">
+            <span id="formState" class="badge">ready</span>
+            <button class="primary" id="saveBtn" type="submit">💾 Save</button>
+          </div>
+        </div>
+
+        <div id="msg" class="hint"></div>
+      </section>
+
+    </form>
+  </main>
+
+  <div id="snack" class="snackbar"></div>
+
+  <footer class="footer-note">
+    OpenDVM Config • Dark UI • Client-side validation. Server validates again.
+  </footer>
+
+  <script>
+    // Super-simpel: Config-Passwort automatisch merken
+    (function(){
+      const PW_KEY = 'opendvm:config_password';
+      const form   = document.getElementById('cfgForm');
+      const pw     = document.getElementById('ConfigPassword');
+      if (!form || !pw) return;
+
+      // Beim Laden: vorhandenes Passwort einsetzen (falls Feld leer)
+      try {
+        const stored = localStorage.getItem(PW_KEY);
+        if (stored && !pw.value) pw.value = stored;
+      } catch(e) { /* ignore */ }
+
+      // Beim Absenden: Passwort im Browser speichern
+      form.addEventListener('submit', () => {
+        try { localStorage.setItem(PW_KEY, pw.value); } catch(e) { /* ignore */ }
+      });
+    })();
+
+    // Show/Hide fürs Config-Passwort
+    (function(){
+      const btn = document.getElementById('togglePw');
+      const inp = document.getElementById('ConfigPassword');
+      if (!btn || !inp) return;
+      btn.addEventListener('click', () => {
+        const isPw = inp.type === 'password';
+        inp.type = isPw ? 'text' : 'password';
+        btn.textContent = isPw ? '🙈 Hide' : '👁️ Show';
+        btn.setAttribute('aria-pressed', String(isPw));
+        // Cursor ans Ende
+        const v = inp.value; inp.value = ''; inp.value = v;
+      });
+    })();
+
+    // Build A–Z dropdown for reflector_module
+    (function fillModuleAZ(){
+      const sel = document.getElementById('reflector_module');
+      const wantedDefault = 'B';
+      for (let i=65;i<=90;i++){
+        const ch = String.fromCharCode(i);
+        const opt = document.createElement('option');
+        opt.value = ch; opt.textContent = ch;
+        if (ch === wantedDefault) opt.selected = true;
+        sel.appendChild(opt);
+      }
+    })();
+
+    const form = document.getElementById('cfgForm');
+    const msg  = document.getElementById('msg');
+    const snack= document.getElementById('snack');
+    const state= document.getElementById('formState');
+
+    function showSnack(text, ok=false){
+      snack.textContent = text;
+      snack.style.borderColor = ok ? '#2c7b4f' : 'var(--border)';
+      snack.style.display = 'block';
+      setTimeout(()=> snack.style.display='none', 3000);
+    }
+
+    function hzIsInt(val){
+      if (val === '' || val === null) return false;
+      const n = Number(val);
+      return Number.isInteger(n) && n > 0;
+    }
+
+    // Comma/dot tolerant → normalize to dot
+    function normDec(str){
+      return (str ?? '').toString().trim().replace(',', '.');
+    }
+
+    function validate(){
+      msg.textContent = '';
+      // Hz fields
+      for (const id of ['RXFrequency','TXFrequency']){
+        const v = document.getElementById(id).value.trim();
+        if (!hzIsInt(v)){
+          msg.innerHTML = `<span class="error">Frequencies must be integer Hz.</span>`;
+          return false;
+        }
+      }
+      // Callsign
+      const call = document.getElementById('Callsign').value.trim();
+      if (!/^[A-Za-z0-9/]{3,}$/.test(call)){
+        msg.innerHTML = `<span class="error">Invalid callsign.</span>`;
+        return false;
+      }
+      // Coordinates (comma/dot ok)
+      const lat = normDec(document.getElementById('Latitude').value);
+      const lon = normDec(document.getElementById('Longitude').value);
+      if (lat === '' || lon === '' || isNaN(Number(lat)) || isNaN(Number(lon))){
+        msg.innerHTML = `<span class="error">Invalid latitude/longitude.</span>`;
+        return false;
+      }
+      // URL darf ohne Schema eingegeben werden → keine Fehlermeldung mehr nötig
+      const cfgPw = document.getElementById('ConfigPassword').value;
+      if (!cfgPw.trim()){
+        msg.innerHTML = `<span class="error">Config Password benötigt.</span>`;
+        return false;
+      }
+      return true;
+    }
+
+    function serializeForm(form){
+      const fd = new FormData(form);
+      // Normalize coordinates before sending
+      fd.set('Latitude', normDec(fd.get('Latitude')));
+      fd.set('Longitude', normDec(fd.get('Longitude')));
+      // URL ggf. mit https:// versehen
+      const rawUrl = fd.get('URL');
+      fd.set('URL', rawUrl);
+      return new URLSearchParams(fd).toString();
+    }
+
+    // === Default-Wert-Erkennung / rote Hinterlegung ===
+    (function defaultHighlighter(){
+      const rules = [
+        { id: 'Callsign', def: 'YOUR_CALL' },
+        { id: 'Id',       def: '123456'  },
+        { id: 'Password', def: 'BMpassword' }
+      ];
+
+      function apply(el, def){
+        if (!el) return;
+        const same = (el.value ?? '') === def;
+        el.classList.toggle('is-default', same);
+      }
+
+      function wire(id, def){
+        const el = document.getElementById(id);
+        if (!el) return;
+        const handler = () => apply(el, def);
+        ['input','change','blur'].forEach(ev => el.addEventListener(ev, handler));
+        handler(); // initial
+      }
+
+      rules.forEach(r => wire(r.id, r.def));
+      // Expose to preload so es nach befüllen erneut angewendet werden kann
+      window.__applyDefaultFlags = () => rules.forEach(r => apply(document.getElementById(r.id), r.def));
+    })();
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      if (!validate()){
+        state.textContent = 'error';
+        state.style.color = '#e5484d';
+        return;
+      }
+      state.textContent = 'saving…';
+      try{
+        const body = serializeForm(form);
+        const r = await fetch('save_config.php', {
+          method:'POST',
+          headers:{'Content-Type':'application/x-www-form-urlencoded'},
+          body
+        });
+        const data = await r.json().catch(()=>null);
+
+        if (r.ok && data && data.ok){
+          state.textContent = 'saved';
+          state.style.color = '#5cff89';
+          msg.innerHTML = `<span class="ok">OK – server accepted configuration data.</span>`;
+          showSnack('Configuration saved', true);
+        } else {
+          const errTxt = (data && data.error) ? data.error : (r.status+' '+r.statusText);
+          state.textContent = 'error';
+          state.style.color = '#e5484d';
+          msg.innerHTML = `<span class="error">Save failed: ${errTxt}</span>`;
+          showSnack('Save error');
+        }
+      } catch(ex){
+        state.textContent = 'error';
+        state.style.color = '#e5484d';
+        msg.innerHTML = `<span class="error">${ex}</span>`;
+        showSnack('Network error');
+      }
+    });
+
+    (async function preload() {
+        try {
+        const r = await fetch('api.php?q=config_inbox', { cache: 'no-store' });
+        if (!r.ok) return;
+        const d = await r.json();
+        if (!d || typeof d !== 'object') return;
+
+        const pick = (k) => d[k] ?? '';
+
+        const setVal = (key, val) => {
+            const el = document.querySelector(`#${key}, [name="${key}"]`);
+            if (!el) return;
+            if (el.tagName === 'SELECT') {
+            el.value = String(val).toUpperCase();
+            } else if (el.type === 'number') {
+            el.value = val === '' ? '' : String(val);
+            } else {
+            el.value = String(val);
+            }
+        };
+
+        const setCoord = (key) => {
+            const v = pick(key);
+            if (v === '' || v == null) return setVal(key, '');
+            // für GUI: Dezimalzeichen aus DB ggf. als Komma anzeigen
+            const s = String(v).replace('.', ',');
+            setVal(key, s);
+        };
+
+        // Kernfelder
+        setVal('Callsign',      pick('Callsign'));
+        setVal('Module',        (pick('Module') || 'B').toString().slice(0,1).toUpperCase());
+        setVal('Id',            pick('Id'));
+        setVal('Duplex',        pick('Duplex'));
+        setVal('RXFrequency',   pick('RXFrequency'));
+        setVal('TXFrequency',   pick('TXFrequency'));
+        setCoord('Latitude');
+        setCoord('Longitude');
+        setVal('Height',        pick('Height'));
+        setVal('Location',      pick('Location'));
+        setVal('Description',   pick('Description'));
+        setVal('URL',           pick('URL'));
+
+        // D-Star
+        setVal('reflector1',        pick('reflector1'));
+        setVal('reflector_module',  (pick('reflector_module') || pick('Module') || 'B').toString().slice(0,1).toUpperCase());
+
+        // YSF
+        setVal('Suffix',        pick('Suffix'));
+        setVal('Startup',       pick('Startup'));
+        setVal('Options', pick('Options'));
+
+        // DMR
+        setVal('Address',       pick('Address'));
+        setVal('Password',      pick('Password'));
+        setVal('Name',          pick('Name'));
+
+        // Nach dem Befüllen Default-Flags neu anwenden
+        if (window.__applyDefaultFlags) window.__applyDefaultFlags();
+        } catch (e) {
+        console.error('preload failed', e);
+        }
+    })();
+
+  </script>
+</body>
+</html>

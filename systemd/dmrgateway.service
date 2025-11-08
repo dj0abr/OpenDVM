@@ -12,7 +12,7 @@ Group=mmdvm
 WorkingDirectory=/var/log/mmdvm
 
 ExecStart=/usr/local/bin/DMRGateway /etc/dmrgateway
-Restart=on-failure
+Restart=always
 RestartSec=2
 StandardOutput=journal
 StandardError=journal

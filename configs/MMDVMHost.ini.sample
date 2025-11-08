@@ -2,7 +2,7 @@
 Callsign=YOUR_CALL
 Id=123456
 Timeout=240
-Duplex=1
+Duplex=0
 RFModeHang=300
 NetModeHang=300
 Display=None

@@ -94,6 +94,7 @@ New entries are immediately detected, parsed, and written into the database.
 | `status` | Current status (mode, callsign, RF/NET, duration, BER) |
 | `lastheard` | Every transmission with timestamp |
 | `reflector` | Current reflector per mode |
+| `config_inbox` | Configuration |
 
 ### Special Features
 
@@ -129,14 +130,14 @@ On a Pi 3/4 or 5, the onboard Bluetooth uses the primary PL011 UART by default. 
 
 There are two types of MMDVM HATs:
 
-Simplex: usually identifiable by a single antenna<br>
-Duplex: identifiable by two antennas or repeater boards
+Simplex: most MMDVM boards are "simplex" boards with one or two antennas<br>
+Duplex: special MMDVM boards e.g., "repeater builder" boards
 
-The “Duplex” setting must match the hardware in use; otherwise, operation may only work in one direction.
+The “Duplex” setting must match the hardware in use; otherwise, operation may only work in one direction. Usually "0" will be used for homebrew stations.
 
 ## 🧰 Installation & Dependencies
 
-Installation is fully automated through **five shell scripts**, which install all dependencies, programs, and configuration files.
+Installation is fully automated through **two shell scripts**, which install all dependencies, programs, and configuration files.
 
 First, download this repository from GitHub:
 
@@ -146,7 +147,7 @@ sudo git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```
 
-Now run the five scripts (all with sudo) as follows:
+Now run the two scripts (all with sudo) as follows:
 
 ### Installation Order
 
@@ -162,36 +163,18 @@ These scripts must be executed **in this order**.
    - Detects your serial device (USB, onboard UART, etc.), lets you pick the correct one
    - re-run this script to switch to a different device (e.g. a new hardware)
 
-2. **Install the MMDVM Host**  
+2. **Install the MMDVM System and all Gateways**  
    - Run the script:
    ```bash
-   sudo ./install_mm.sh
+   sudo ./install.sh
    ```
    - Installs all system dependencies  
    - Prepares directories (e.g., `/var/log/mmdvm`)  
    - Sets up the MariaDB database  
    - Compiles and installs the C++ backend  
    - Installs the central DV interface **MMDVMHost**
-
-3. **Install the YSF Gateway**  
-   - Run the script:
-   ```bash
-   sudo ./install_ysf.sh
-   ```
    - Installs and configures the **System Fusion Gateway**
-
-4. **Install the D-Star Gateway**  
-   - Run the script:
-   ```bash
-   sudo ./install_irc.sh
-   ```
    - Installs and configures the **D-Star Gateway**
-
-5. **Install the DMR Gateway**  
-   - Run the script:
-   ```bash
-   sudo ./install_dmr.sh
-   ```
    - Installs and configures the **DMR Gateway**
 
 After completion, **default configuration files** are automatically copied to `/etc`.  
@@ -210,58 +193,40 @@ All site and system parameters for the G4KLX modules are stored in the following
 
 Sample versions of these files are included in this package (with a .sample extension) and must be customized to match your station or repeater setup.
 
-To simplify this process, the most important parameters have been extracted into the **site.conf** file.
 This file contains all site-specific settings such as callsign, frequencies, coordinates, and network parameters.
-
-Using the provided rendering script, the information from site.conf is automatically written into the corresponding sections of the G4KLX configuration files.
-If you require special adjustments or advanced settings, you can still edit the configuration files directly.
-
-A template for site.conf can be found at:
-
-`
-configs/site.conf.sample
-`
 
 ### Steps
 
-1. **Copy the template:**
-   ```bash
-   cd configs
-   sudo cp site.conf.sample site.conf
+1. **Open the GUI in a browser:**
+   ```
+   Enter the board's IP address in your browser.
+   Locate the “SETUP” button in the top-right corner.  
+   Click “SETUP”.
    ```
 
-2. **Edit the file:**
-   Open `site.conf` in a text editor and enter your own data (e.g. callsign, DMR ID, frequencies, site location, Brandmeister credentials, etc.).
-   ```bash
-   sudo nano site.conf
-   ```
+2. **Edit the Configuration:**
 
-3. **Render the configuration:**
-   ```bash
-   sudo ./render-config
-   ```
-   The program reads your `site.conf` and automatically fills all values into the following configuration files:
+   The minimum required settings are:
 
-   /etc/MMDVMHost.ini  
-   /etc/ircddbgateway  
-   /etc/ysfgateway  
-   /etc/dmrgateway
+   * Your callsign
+   * Your DMR ID (if required, click the link below the DMR ID field to open the DMR database)
+   * Set Duplex = 0 (set to 1 ONLY if you are using a repeater board)
+   * Set RX and TX frequencies. It is highly recommended to use differet RX and TX frequencies, otherwise you may experience issues with older D-Star Transceivers
+   * Enter your Brandmeister password (as configured in SelfCare on the BM Dashboard)
+   * Enter the Config Password (default: setuppassword). You can define your own password by editing the file save_config.php (see ./gui/html).
+   * Click "SAVE"
 
-   Before any modification, a **backup** is automatically created:
+   If you receive a green confirmation message, the configuration has been successfully stored.
 
-   `
-   file.bak-YYYYMMDD-HHMMSS
-   `
-
-4. **Finalize:**
-   After rendering, the installation is complete.  
-   You can still manually adjust the generated files if needed – but that’s usually not necessary.
+You can still manually edit the generated configuration files if needed — but this is rarely necessary.
 
 5. **Reboot:**
    ```bash
    sudo reboot
    ```
-   After reboot, the system is fully operational.
+   After reboot, the system will be fully operational.
+
+   Please allow some time for the reflectors to connect after the first reboot — this may take several minutes
 
 ---
 

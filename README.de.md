@@ -1,40 +1,40 @@
 [🇬🇧 English](README.md) | [🇩🇪 Deutsch](README.de.md)
 
-# 🛰️ OpenDVM MultiMode Repeater/Station für Debian/Linux
+# 🛰️ OpenDVM Multimode Repeater/Station für Debian/Linux
 
-Dieses Projekt baut auf den **Digital Voice (DV) Modulen von G4KLX** auf, die – ähnlich wie **Pi‑Star** – zu einer kompletten Lösung kombiniert werden.  
-Allerdings ist Pi‑Star **ausschließlich für den Raspberry Pi** ausgelegt.
+Dieses Projekt basiert auf den **Digital Voice (DV) Modulen von G4KLX**, die zu einer kompletten Lösung wie **Pi-Star** kombiniert werden.  
+Allerdings ist Pi-Star **ausschließlich für den Raspberry Pi** konzipiert.
 
-👉 **Ziel dieses Projekts** ist eine **voll funktionsfähige, plattformunabhängige DV Multimode‑Lösung**, die auf **jedem Debian‑basierten System** läuft – besonders zuverlässig auf echten PCs oder Servern (PC, virtuellen Maschinen, Raspberry, Odroid, Orange Pi und viele weitere).
+👉 **Ziel dieses Projekts** ist es, eine **voll funktionsfähige, plattformunabhängige Multimode-DV-Lösung** zu schaffen, die auf **jedem Debian-basierten System** läuft – stabil und zuverlässig auf echter Hardware oder virtuellen Maschinen (PC, VM, Raspberry, Odroid, Orange Pi und viele mehr).
 
-Die aktuelle Version unterstützt **D-Star, DMR and YSF (C4FM) auf MMDVM Platinen** (USB oder Aufsteckplatinen).
+Die aktuelle Version unterstützt **D-Star, DMR und YSF (C4FM)** auf **MMDVM-Boards** (USB-Boards oder HATs).
 
-Es nutzt folgende Repositories von G4KLX:
+Folgende G4KLX-Repositories werden verwendet:
 
 - [MMDVMHost](https://github.com/g4klx/MMDVMHost)  
 - [ircDDBGateway](https://github.com/g4klx/ircDDBGateway)  
 - [DMRGateway](https://github.com/g4klx/DMRGateway)  
-- [YSFClient](https://github.com/g4klx/YSFClients) *(als Gateway verwendet)*  
+- [YSFClient](https://github.com/g4klx/YSFClients) *(als Gateway genutzt)*  
 
-Die **gesamte Installation** wird über **fünf Shell‑Skripte** automatisiert, die alle Komponenten korrekt einrichten.  
+Die **gesamte Installation** erfolgt automatisiert über **fünf Shell-Skripte**, die alle Komponenten korrekt einrichten.  
 
-Zusätzlich enthält das Projekt einen **Logfile‑Parser**, der alle Betriebsdaten aus den MMDVM‑, YSF‑ und DMR‑Logs einliest und in eine **MariaDB‑Datenbank** schreibt.  
-Diese Daten dienen als Backend für ein modernes **Web‑Dashboard**, das den Repeater‑ oder Hotspot‑Status in Echtzeit anzeigt.
+Zusätzlich enthält das Projekt einen **Logfile-Parser**, der Betriebsdaten aus MMDVM-, YSF- und DMR-Logs liest und in eine **MariaDB-Datenbank** schreibt.  
+Diese Daten dienen als Backend für ein modernes **Web-Dashboard**, das den Repeater- oder Hotspot-Status in Echtzeit anzeigt.
 
-Dieses Projekt wurde ursprünglich für das MMDVM Repeater Builder Board entwickelt, das im DB0SL Multimode Repeater verwendet wird. Es läuft auch mit den üblichen MMDVM Raspi-Aufsteckboards. Für andere spezielle Hardware oder Anwendungsfälle passen Sie die Konfigurationsdateien nach Bedarf an (siehe den Abschnitt [Modem] in der MMDVMHost.ini).
+Das Projekt wurde ursprünglich für das MMDVM Repeater Builder Board des DB0SL-Multimode-Repeaters entwickelt. Es läuft aber auch mit gängigen MMDVM Raspberry Pi HATs. Für andere Hardware oder spezielle Anwendungen können die Konfigurationsdateien angepasst werden (siehe Abschnitt [Modem] in MMDVMHost.ini).
 
 ---
 
 ## 📖 Inhaltsverzeichnis
 
-1. [Überblick](#-überblick)  
+1. [Übersicht](#-übersicht)  
 2. [Architektur](#-architektur)  
-3. [Backend – Log‑Monitor & Datenbank](#-backend--log-monitor--datenbank)  
+3. [Backend – Log-Monitor & Datenbank](#-backend--log-monitor--datenbank)  
 4. [Installation & Abhängigkeiten](#-installation--abhängigkeiten)  
 5. [Konfiguration](#-konfiguration)  
 6. [Web-Frontend](#-web-frontend)  
 7. [Systemeinrichtung & Wartung](#-systemeinrichtung--wartung)  
-8. [Danksagungen & Lizenz](#-danksagungen--lizenz)
+8. [Danksagung & Lizenz](#-danksagung--lizenz)
 
 ---
 
@@ -46,19 +46,19 @@ Dieses Projekt wurde ursprünglich für das MMDVM Repeater Builder Board entwick
   <img src="gui1.png" alt="Systemübersicht" width="250">
 </a>
 
-🔗 **Live‑Installation:** [digital.db0sl.de](https://digital.db0sl.de/)
+🔗 **Live-Installation:** [digital.db0sl.de](https://digital.db0sl.de/)
 
-## 🔍 Überblick
+## 🔍 Übersicht
 
 **Hauptfunktionen:**
 
-- Echtzeit‑Überwachung der Logs von MMDVMHost, YSFGateway und DMRGateway  
+- Echtzeitüberwachung der Logs von MMDVMHost, YSFGateway und DMRGateway  
 - Automatische Speicherung erkannter Ereignisse in MariaDB  
-- Grafische Darstellung über ein modernes Web‑Frontend  
-- Zentrale Konfiguration über eine einheitliche Datei `site.conf`  
-- Automatische Generierung aller Gateway‑Konfigurationsdateien  
+- Grafische Darstellung über ein modernes Web-Frontend  
+- Zentrale Konfiguration über eine einheitliche `site.conf`  
+- Automatische Erstellung aller Gateway-Konfigurationsdateien  
 - Vollständig passwortloser, sicherer Datenbankzugriff  
-- Keine Frameworks, keine Pi‑Abhängigkeit – läuft auf jedem Debian‑System
+- Keine Frameworks, keine Pi-Abhängigkeit – läuft auf jedem Debian-System
 
 ---
 
@@ -68,7 +68,7 @@ Dieses Projekt wurde ursprünglich für das MMDVM Repeater Builder Board entwick
 
 ---
 
-## 🧠 Backend – Log‑Monitor & Datenbank
+## 🧠 Backend – Log-Monitor & Datenbank
 
 Das Hauptprogramm überwacht kontinuierlich folgende Logdateien:
 
@@ -76,42 +76,44 @@ Das Hauptprogramm überwacht kontinuierlich folgende Logdateien:
 - `/var/log/mmdvm/YSFGateway-YYYY-MM-DD.log`  
 - `/var/log/mmdvm/DMRGateway-YYYY-MM-DD.log`
 
-Neue Einträge werden sofort erkannt, geparst und in die Datenbank geschrieben.
+Neue Einträge werden sofort erkannt, ausgewertet und in die Datenbank geschrieben.
 
 ### Erfasste Informationen
 
-- TX‑Aktivitäten und Rufzeichen für D‑Star, DMR und System Fusion  
+- TX-Aktivitäten und Rufzeichen für D-Star, DMR und System Fusion  
 - Dauer und BER jeder Übertragung  
 - Aktueller Betriebsmodus  
-- Reflector‑Status für D‑Star, Fusion und DMR  
-- Automatische Erkennung von Log‑Rotation und ‑Trunkierung  
-- Verbindet sich nach Datenbankfehlern automatisch neu
+- Reflektorstatus für D-Star, Fusion und DMR  
+- Automatische Erkennung von Logrotation und Trunkierung  
+- Automatischer Reconnect nach Datenbankfehlern  
 
 ### Datenbanktabellen
 
-| Table | Description |
+| Tabelle | Beschreibung |
 |--------|--------------|
-| `status` | Aktueller Status (Mode, Callsign, RF/NET, Dauer, BER) |
+| `status` | Aktueller Status (Modus, Rufzeichen, RF/NET, Dauer, BER) |
 | `lastheard` | Jede Übertragung mit Zeitstempel |
-| `reflector` | Aktueller Reflector pro Mode |
+| `reflector` | Aktueller Reflektor pro Modus |
+| `config_inbox` | Konfiguration |
 
-### Besonderheiten
+### Besondere Merkmale
 
-- Erkennung abgebrochener Übertragungen (heuristische Timing‑Logik)  
-- Rufzeichen‑Validierung (mind. 3 Zeichen, mindestens 1 Ziffer)  
-- D‑Star speichert keine DG‑ID, Fusion schon  
-- „Watchdog expired“‑Meldungen gelten als EOT  
-- DMR‑Masternamen (z. B. `BM_2621_Germany`) werden automatisch erkannt  
+- Erkennung unterbrochener Übertragungen (heuristische Zeitmessung)  
+- Rufzeichenprüfung (min. 3 Zeichen, mindestens 1 Ziffer)  
+- D-Star speichert keine DG-ID, Fusion schon  
+- „Watchdog expired“-Meldungen gelten als EOT  
+- DMR-Masternamen (z. B. `BM_2621_Germany`) werden automatisch erkannt  
 
 ---
 
 ## 🍓 Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)
 
-### serielle Schnittstelle
+### Serielle Schnittstelle
 
-**Folgendes gilt NICHT für USB-MMDVM Platinen.**
+**Dies gilt NICHT für USB-MMDVM-Boards.**
 
-Auf einem Pi 3/4 oder 5 verwendet das eingebaute Bluetooth standardmäßig die primäre **PL011-UART**. Um die GPIO-UART für das **MMDVM-HAT** freizugeben, deaktiviere Bluetooth und aktiviere die UART.
+Auf einem Pi 3/4 oder 5 verwendet das Onboard-Bluetooth standardmäßig die primäre PL011-UART.  
+Um die GPIO-UART für das MMDVM-HAT freizugeben, muss Bluetooth deaktiviert und die UART aktiviert werden.
 
 1. **Boot-Konfiguration bearbeiten**  
    *(Bookworm und neuer: `/boot/firmware/config.txt`; ältere Releases: `/boot/config.txt`)*
@@ -128,177 +130,144 @@ Auf einem Pi 3/4 oder 5 verwendet das eingebaute Bluetooth standardmäßig die p
 
 ### Duplex
 
-Es gibt zwei Arten von MMDVM-Aufsteckplatinen:
+Es gibt zwei Arten von MMDVM-HATs:
 
-Simplex: in der Regel an einer einzelnen Antenne erkennbar<br>
-Duplex: an zwei Antennen oder Repeater-Boards erkennbar
+Simplex: die meisten MMDVM-Boards sind „Simplex“-Boards mit einer oder zwei Antennen  
+Duplex: spezielle MMDVM-Boards, z. B. „Repeater Builder“-Boards
 
-Die „Duplex“-Einstellung muss zur verwendeten Hardware passen; andernfalls funktioniert der Betrieb möglicherweise nur in eine Richtung.
+Die Einstellung „Duplex“ muss zur verwendeten Hardware passen, sonst funktioniert der Betrieb nur in eine Richtung. Meist wird „0“ für Eigenbau-Stationen verwendet.
+
+---
 
 ## 🧰 Installation & Abhängigkeiten
 
-Die Installation erfolgt vollständig automatisiert über **fünf Shell‑Skripte**, die alle Abhängigkeiten, Programme und Konfigurationen installieren.
+Die Installation erfolgt vollständig automatisiert über **zwei Shell-Skripte**, die alle Abhängigkeiten, Programme und Konfigurationsdateien installieren.
 
-Als erstes lade dieses Repository von Github herunter:
+Zuerst das Repository von GitHub herunterladen:
+
 ```bash
 cd /opt
 sudo git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```
 
-Jetzt führe die fünf Scripts (alle mit `sudo`) wie folgt aus:
+Jetzt die beiden Skripte (alle mit sudo) in folgender Reihenfolge ausführen:
 
 ### Installationsreihenfolge
 
 👉 **Wichtig:**  
 Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
 
-1. **Installiere den seriellen Port**  
-   - Wenn du einen Raspberry Pi mit MMDVM-HAT verwendest, lies zuerst das Kapitel „Raspberry Pi 3/4/5 MMDVM HAT (headless Raspberry Pi OS)“, bevor du weitermachst.
-   - Führe das Script aus:
+1. **Serielle Schnittstelle installieren**  
+   - Wenn du einen Raspberry Pi mit MMDVM-HAT verwendest, lies zuerst das Kapitel „Raspberry Pi 3/4/5 + MMDVM HAT“.  
+   - Skript ausführen:
    ```bash
    sudo ./install_serial.sh
    ```
-   - Erkennt Ihr serielles Gerät (USB, Onboard‑UART etc.) und lässt Sie das richtige auswählen
-   - führen Sie dieses Skript erneut aus, um auf ein anderes Gerät zu wechseln (z. B. neue Hardware)
+   - Erkennt dein serielles Gerät (USB, Onboard-UART usw.), lässt dich das richtige auswählen  
+   - Kann erneut ausgeführt werden, um ein anderes Gerät zu wählen (z. B. neue Hardware)
 
-2. **Installiere MMDVMHost**  
-   - Führe das Script aus:
+2. **MMDVM-System und alle Gateways installieren**  
    ```bash
-   sudo ./install_mm.sh
+   sudo ./install.sh
    ```
    - Installiert alle Systemabhängigkeiten  
    - Bereitet Verzeichnisse vor (z. B. `/var/log/mmdvm`)  
-   - Richtet die MariaDB‑Datenbank ein  
-   - Kompiliert und installiert das C++‑Backend  
-   - Installiert die zentrale DV‑Schnittstelle **MMDVMHost**
+   - Richtet die MariaDB-Datenbank ein  
+   - Kompiliert und installiert das C++-Backend  
+   - Installiert das zentrale DV-Interface **MMDVMHost**
+   - Installiert und konfiguriert das **System Fusion Gateway**
+   - Installiert und konfiguriert das **D-Star Gateway**
+   - Installiert und konfiguriert das **DMR Gateway**
 
-3. **Installiere das YSF Gateway**  
-   - Führe das Script aus:
-   ```bash
-   sudo ./install_ysf.sh
-   ```
-   - Installiert und konfiguriert das **System‑Fusion‑Gateway**
-
-4. **Installiere das D-Star Gateway**  
-   - Führe das Script aus:
-   ```bash
-   sudo ./install_irc.sh
-   ```
-   - Installiert und konfiguriert das **D‑Star‑Gateway**
-
-5. **Installiere das DMR Gateway**  
-   - Führe das Script aus:
-   ```bash
-   sudo ./install_dmr.sh
-   ```
-   - Installiert und konfiguriert das **DMR‑Gateway**
-
-Nach Abschluss werden **Standard‑Konfigurationsdateien** automatisch nach `/etc` kopiert.  
-Sie müssen anschließend an Ihre Umgebung angepasst werden – siehe [Konfiguration](#-Konfiguration).
+Nach Abschluss werden **Standardkonfigurationsdateien** automatisch nach `/etc` kopiert.  
+Diese müssen anschließend an die eigene Umgebung angepasst werden – siehe [Konfiguration](#-konfiguration).
 
 ---
 
 ## 🧾 Konfiguration
 
-Alle Standort‑ und Systemparameter für die G4KLX‑Module werden in folgenden Konfigurationsdateien gespeichert:
+Alle standort- und systembezogenen Parameter für die G4KLX-Module werden in folgenden Dateien gespeichert:
 
    /etc/MMDVMHost.ini  
    /etc/ircddbgateway  
    /etc/ysfgateway  
    /etc/dmrgateway
 
-Beispielversionen dieser Dateien sind in diesem Paket enthalten (mit der Endung .sample) und müssen an Ihre Station oder Ihren Repeater angepasst werden.
+Beispieldateien sind im Paket enthalten (mit der Endung `.sample`) und müssen für die eigene Station angepasst werden.
 
-Zur Vereinfachung wurden die wichtigsten Parameter in die Datei **site.conf** ausgelagert.  
-Diese enthält alle standortspezifischen Einstellungen wie Rufzeichen, Frequenzen, Koordinaten und Netzparameter.
-
-Mit dem bereitgestellten Rendering‑Skript werden die Informationen aus der site.conf automatisch in die entsprechenden Abschnitte der G4KLX‑Konfigurationsdateien geschrieben.  
-Bei besonderen Anforderungen oder erweiterten Einstellungen können Sie die Konfigurationsdateien weiterhin direkt bearbeiten.
-
-Eine Vorlage für die site.conf befindet sich unter:
-
-`
-configs/site.conf.sample
-`
+Diese Dateien enthalten alle standortspezifischen Einstellungen wie Rufzeichen, Frequenzen, Koordinaten und Netzparameter.
 
 ### Schritte
 
-1. **Vorlage kopieren:**
-   ```bash
-   cd configs
-   sudo cp site.conf.sample site.conf
+1. **GUI im Browser öffnen:**
+   ```
+   IP-Adresse des Boards im Browser eingeben.  
+   Den „SETUP“-Button oben rechts suchen.  
+   „SETUP“ anklicken.
    ```
 
-2. **Datei bearbeiten:**  
-   Öffnen Sie `site.conf` in einem Editor und tragen Sie Ihre Daten ein (z. B. Rufzeichen, DMR‑ID, Frequenzen, Standort, BrandMeister‑Zugangsdaten usw.).
-   ```bash
-   sudo nano site.conf
-   ```
+2. **Konfiguration bearbeiten:**
 
-3. **Konfiguration rendern:**
-   ```bash
-   sudo ./render-config
-   ```
-   Das Programm liest Ihre `site.conf` und füllt alle Werte automatisch in folgende Konfigurationsdateien ein:
+   Die mindestens erforderlichen Einstellungen sind:
 
-   /etc/MMDVMHost.ini  
-   /etc/ircddbgateway  
-   /etc/ysfgateway  
-   /etc/dmrgateway
+   * Dein Rufzeichen  
+   * Deine DMR-ID (falls nötig, auf den Link unter dem DMR-ID-Feld klicken, um die DMR-Datenbank zu öffnen)  
+   * Duplex = 0 (nur auf 1 setzen, wenn du ein Repeater-Board nutzt)  
+   * RX- und TX-Frequenzen einstellen. Es wird dringend empfohlen, **unterschiedliche RX- und TX-Frequenzen** zu verwenden, sonst können Probleme mit älteren D-Star-Geräten auftreten.  
+   * Dein Brandmeister-Passwort eingeben (wie in *SelfCare* auf dem BM-Dashboard gesetzt).  
+   * Das Konfigurationspasswort eingeben (Standard: `setuppassword`). Eigenes Passwort kann in `save_config.php` (unter `./gui/html`) gesetzt werden.  
+   * Auf **SAVE** klicken.
 
-   Vor jeder Änderung wird automatisch ein **Backup** erstellt:
+   Wenn eine grüne Bestätigungsmeldung erscheint, wurde die Konfiguration erfolgreich gespeichert.
 
-   `
-   file.bak-YYYYMMDD-HHMMSS
-   `
-
-4. **Abschließen:**  
-   Nach dem Rendern ist die Installation abgeschlossen.  
-   Sie können die generierten Dateien bei Bedarf weiter manuell anpassen – in der Regel ist das aber nicht notwendig.
+Die generierten Konfigurationsdateien können bei Bedarf manuell angepasst werden – in der Regel ist das aber nicht nötig.
 
 5. **Neustart:**
    ```bash
    sudo reboot
    ```
-   Nach dem Neustart ist das System voll einsatzbereit.
+   Nach dem Neustart ist das System betriebsbereit.
+
+   Bitte gib den Reflektoren nach dem ersten Neustart etwas Zeit, um sich zu verbinden – das kann einige Minuten dauern.
 
 ---
 
 ## 🌐 Web-Frontend
 
-Das Web‑Frontend zeigt alle Betriebsdaten in Echtzeit an.  
-Vollständig statisch – kein PHP‑Framework erforderlich, nur ein kleines `api.php` für die JSON‑Ausgabe.
+Das Web-Frontend zeigt alle Betriebsdaten in Echtzeit an.  
+Komplett statisch – kein PHP-Framework erforderlich, nur eine kleine `api.php` für JSON-Ausgaben.
 
-### Features
+### Funktionen
 
-- Live‑Status: Mode, Rufzeichen, Dauer, BER, RF/NET  
-- Farbige Status‑Kacheln und Länderflaggen  
-- Reflector‑Status für D‑Star, DMR, Fusion  
-- „Last Heard“‑Liste mit Rufzeichen, Zeitstempel, Dauer  
-- Aktivitätsdiagramm (48 h, RF/NET getrennt)  
-- Balkenstatistik und 30‑Tage‑Heatmap  
-- Reaktionsfähiges Dark‑UI  
+- Live-Status: Modus, Rufzeichen, Dauer, BER, RF/NET  
+- Farbige Statusfelder und Länderflaggen  
+- Reflektorstatus für D-Star, DMR, Fusion  
+- „Last Heard“-Liste mit Rufzeichen, Zeitstempel, Dauer  
+- Aktivitätsdiagramm (48h, RF/NET getrennt)  
+- Balkenstatistiken und 30-Tage-Heatmap  
+- Responsives dunkles UI  
 - Einzige externe Bibliothek: **Chart.js**
 
 ### Technologie
 
-- Reines Vanilla‑JavaScript  
-- CSS‑Grid‑Layout  
-- Aktualisierung jede Sekunde per AJAX  
-- Funktioniert auf jedem Webserver (nginx, Apache, lighttpd)
+- Reines Vanilla JavaScript  
+- CSS Grid Layout  
+- Sekündliche Aktualisierung per AJAX  
+- Funktioniert mit jedem Webserver (nginx, Apache, lighttpd)
 
 ---
 
 ## 🧱 Systemeinrichtung & Wartung
 
-- Datenbankzugriff über Unix‑Socket  
-- Installationsskripte legen Benutzer und Rechte automatisch an  
+- Datenbank läuft über Unix-Socket  
+- Installationsskripte erstellen Benutzer und Rechte automatisch  
 
 ---
 
-## 🎯 Danksagungen & Lizenz
+## 🎯 Danksagung & Lizenz
 
-- Jonathan Naylor G4KLX für seine herausragenden DV‑Implementierungen, die die Grundlage dieses Projekts bilden  
-- Diese Software ist unter der **GPL v2** lizenziert und primär für den Amateurfunk sowie zu Ausbildungszwecken gedacht. Dieses Projekt enthält Komponenten von G4KLX unter GPL v2.  
-Daher bleibt das Gesamtwerk unter GPL v2.
+- Jonathan Naylor G4KLX für seine herausragenden DV-Implementierungen, die die Grundlage dieses Projekts bilden  
+- Diese Software steht unter der **GPL v2** und ist in erster Linie für den Amateurfunk und Bildungszwecke gedacht.  
+  Dieses Projekt enthält Komponenten von G4KLX, die unter GPL v2 lizenziert sind.  
+  Daher bleibt das Gesamtwerk unter GPL v2.

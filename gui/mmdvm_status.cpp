@@ -810,8 +810,7 @@ public:
       port(0), unix_socket("/run/mysqld/mysqld.sock"),
       conn(nullptr),
       st_upsert_status(nullptr), st_insert_lastheard(nullptr),
-      st_upsert_reflector_dstar(nullptr), st_upsert_reflector_fusion(nullptr), st_upsert_reflector_dmr(nullptr),
-      st_upsert_localconfig(nullptr)
+      st_upsert_reflector_dstar(nullptr), st_upsert_reflector_fusion(nullptr), st_upsert_reflector_dmr(nullptr)
        {
     }
 
@@ -872,54 +871,6 @@ public:
         if (mysql_stmt_execute(st_upsert_status) != 0) {
             dlog("[DB  ] exec upsert status failed: ", mysql_stmt_error(st_upsert_status));
         }
-    }
-
-    void upsertLocalConfig(const LocalConfig& lc) {
-        if (!ensure_conn() || !st_upsert_localconfig) return;
-
-        // Bind-Reihenfolge wie im SQL: callsign, duplex, rxfreq, txfreq, latitude, longitude, location, description
-        MYSQL_BIND b[9]{}; // 9 inkl. id im SQL (fest), wir binden 8 + null-terminations-handling
-
-        // callsign
-        Scratch s_callsign(lc.callsign);
-        b[0] = s_callsign.bind_str();
-
-        // duplex (TINYINT)
-        signed char duplex = static_cast<signed char>(lc.duplex);
-        b[1].buffer_type = MYSQL_TYPE_TINY;
-        b[1].buffer = &duplex;
-
-        // rxfreq / txfreq (BIGINT UNSIGNED -> wir binden als LONGLONG)
-        unsigned long long rxf = lc.rxFrequency;
-        unsigned long long txf = lc.txFrequency;
-        b[2].buffer_type = MYSQL_TYPE_LONGLONG; b[2].buffer = &rxf; b[2].is_unsigned = 1;
-        b[3].buffer_type = MYSQL_TYPE_LONGLONG; b[3].buffer = &txf; b[3].is_unsigned = 1;
-
-        // latitude / longitude (nullable double bei NaN)
-        NullableDouble nlat(nullIfNaN(lc.latitude));
-        NullableDouble nlon(nullIfNaN(lc.longitude));
-        b[4] = nlat.bind_double();
-        b[5] = nlon.bind_double();
-
-        // location / description (nullable string bei leer)
-        bool has_loc = !lc.location.empty();
-        bool has_desc = !lc.description.empty();
-        Scratch s_loc(lc.location);
-        Scratch s_desc(lc.description);
-        NullableStr nsloc(has_loc);
-        NullableStr nsdesc(has_desc);
-        b[6] = nsloc.bind_str(s_loc);
-        b[7] = nsdesc.bind_str(s_desc);
-
-        if (mysql_stmt_bind_param(st_upsert_localconfig, b) != 0) {
-            dlog("[DB  ] bind upsert localconfig failed: ", mysql_stmt_error(st_upsert_localconfig));
-            return;
-        }
-        if (mysql_stmt_execute(st_upsert_localconfig) != 0) {
-            dlog("[DB  ] exec upsert localconfig failed: ", mysql_stmt_error(st_upsert_localconfig));
-            return;
-        }
-        dlog("[DB  ] localconfig upserted");
     }
 
     void insertLastHeard(const std::string& callsign,
@@ -1016,7 +967,6 @@ private:
     MYSQL* conn;
     MYSQL_STMT *st_upsert_status, *st_insert_lastheard;
     MYSQL_STMT *st_upsert_reflector_dstar, *st_upsert_reflector_fusion, *st_upsert_reflector_dmr;
-    MYSQL_STMT *st_upsert_localconfig;
 
     // ---- Verbindungsaufbau + Statements (deine Snippets) ----
     bool connect() {
@@ -1080,21 +1030,6 @@ private:
             " updated_at DATETIME"
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
         if (mysql_query(conn, q3) != 0) dlog("[DB  ] create reflector failed: ", mysql_error(conn));
-
-        const char* q4 =
-            "CREATE TABLE IF NOT EXISTS localconfig ("
-            " id TINYINT PRIMARY KEY,"
-            " callsign VARCHAR(20),"
-            " duplex TINYINT,"
-            " rxfreq BIGINT UNSIGNED,"
-            " txfreq BIGINT UNSIGNED,"
-            " latitude DOUBLE NULL,"
-            " longitude DOUBLE NULL,"
-            " location VARCHAR(64) NULL,"
-            " description VARCHAR(128) NULL,"
-            " updated_at DATETIME"
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
-        if (mysql_query(conn, q4) != 0) dlog("[DB  ] create localconfig failed: ", mysql_error(conn));
 
         mysql_query(conn, "INSERT IGNORE INTO reflector (id,dstar,dmr,fusion,updated_at) "
                           "VALUES (1,NULL,NULL,NULL,NOW());");
@@ -1169,22 +1104,6 @@ private:
             dlog("[DB  ] prepare upsert reflector.dmr failed: ", mysql_error(conn));
             destroy_statements();
         }
-
-        const char* ps6 =
-            "INSERT INTO localconfig "
-            " (id, callsign, duplex, rxfreq, txfreq, latitude, longitude, location, description, updated_at) "
-            "VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, NOW()) "
-            "ON DUPLICATE KEY UPDATE "
-            " callsign=VALUES(callsign), duplex=VALUES(duplex), rxfreq=VALUES(rxfreq), txfreq=VALUES(txfreq),"
-            " latitude=VALUES(latitude), longitude=VALUES(longitude),"
-            " location=VALUES(location), description=VALUES(description), updated_at=NOW();";
-
-        st_upsert_localconfig = mysql_stmt_init(conn);
-        if (!st_upsert_localconfig ||
-            mysql_stmt_prepare(st_upsert_localconfig, ps6, (unsigned long)strlen(ps6)) != 0) {
-            dlog("[DB  ] prepare upsert localconfig failed: ", mysql_error(conn));
-            destroy_statements();
-        }
     }
 
     void destroy_statements() {
@@ -1193,7 +1112,6 @@ private:
         if (st_upsert_reflector_dstar) { mysql_stmt_close(st_upsert_reflector_dstar); st_upsert_reflector_dstar = nullptr; }
         if (st_upsert_reflector_fusion) { mysql_stmt_close(st_upsert_reflector_fusion); st_upsert_reflector_fusion = nullptr; }
         if (st_upsert_reflector_dmr) { mysql_stmt_close(st_upsert_reflector_dmr); st_upsert_reflector_dmr = nullptr; }
-        if (st_upsert_localconfig) { mysql_stmt_close(st_upsert_localconfig); st_upsert_localconfig = nullptr; }
     }
 
     // ---- Helpers für Binds ----
@@ -1367,7 +1285,6 @@ int main(int argc, char** argv) {
     LocalConfig cfg = readLocalConfig();
     LogParser parser(cfg);
     Database   db;
-    db.upsertLocalConfig(cfg);
 
     // Argumente gemerkt: wenn keine angegeben sind, beobachten wir immer die heutigen Standardpfade
     std::vector<std::string> argPaths;

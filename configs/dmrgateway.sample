@@ -51,7 +51,7 @@ UserControl=1
 Module=E
 
 [DMR Network 1]
-Enabled=1
+Enabled=0
 Address=2621.master.brandmeister.network
 Port=62031
 PassAllPC0=1

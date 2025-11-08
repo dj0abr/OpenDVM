@@ -1,6 +1,6 @@
 [Unit]
 Description=ircDDBGateway
-After=network-online.target
+After=network-online.target mmdvmhost.service
 Wants=network-online.target
 
 [Service]
@@ -23,7 +23,7 @@ ExecStartPre=/bin/sh -c 'host="${IRCDDB_WAIT_HOST:-dns.xreflector.net}"; \
 # Daemon im Vordergrund laufen lassen (damit systemd ihn steuern kann)
 ExecStart=/usr/local/bin/ircddbgatewayd -logdir /var/log/ircddbgateway -foreground
 
-Restart=on-failure
+Restart=always
 RestartSec=3
 
 [Install]

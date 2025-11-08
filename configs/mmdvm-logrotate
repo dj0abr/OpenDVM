@@ -1,13 +1,3 @@
-/var/log/irdDDBgateway.log {
-    daily
-    rotate 14
-    missingok
-    notifempty
-    compress
-    delaycompress
-    copytruncate
-}
-
 /var/log/mmdvm/*.log {
     daily
     rotate 14

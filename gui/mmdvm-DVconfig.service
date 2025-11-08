@@ -1,4 +1,3 @@
-# /etc/systemd/system/mmdvm-status.service
 [Unit]
 Description=MMDVM Status Service
 After=network-online.target mariadb.service
@@ -10,10 +9,9 @@ Type=simple
 User=mmdvm
 Group=mmdvm
 WorkingDirectory=/usr/local/bin
-# warte bis der Socket existiert (max. 30s), sonst Startfehler
+# warte bis der Socket existiert (max ~30s)
 ExecStartPre=/bin/sh -c 'for i in $(seq 1 30); do [ -S /run/mysqld/mysqld.sock ] && exit 0; sleep 1; done; echo "mysqld.sock fehlt"; exit 1'
-ExecStart=/usr/local/bin/mmdvm-status /var/log/mmdvm
-
+ExecStart=/usr/local/bin/DVconfig
 Restart=always
 RestartSec=2
 

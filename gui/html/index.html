@@ -442,14 +442,14 @@
         align-items: baseline;
       }
 
-      /* Gelbe Zusatzzeile unter beiden Spalten */
-      .refl-item--grid .dtmf-note {
-        grid-column: 1 / -1;
+      .dtmf-note {
         font-size: 12px;
         color: #ffcf40;
         margin-top: 1px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
-          monospace;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      }
+      .refl-item--grid .dtmf-note {
+        grid-column: 1 / -1; /* unter beide Spalten */
       }
 
       /* D-Star-Zeile als 2-Spalten-Grid */
@@ -476,7 +476,37 @@
         border-radius: 12px;
         overflow: hidden;
       }
+      /* Setup-Button oben rechts im Header */
+      .setup-btn {
+        position: absolute;
+        top: 12px;
+        right: 14px;
+        display: inline-block;
+        padding: 6px 10px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--fg);
+        background: var(--tile-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        text-decoration: none;
+        box-shadow: 0 1px 0 #0004 inset;
+        transition: transform .08s ease, background-color .15s ease, border-color .15s ease;
+      }
 
+      .setup-btn:hover {
+        background: #2a3038;
+        border-color: #2b333b;
+      }
+
+      .setup-btn:active {
+        transform: translateY(1px);
+      }
+
+      .setup-btn:focus-visible {
+        outline: 2px solid #acf8ff;
+        outline-offset: 2px;
+      }
     </style>
 
     <!-- Chart.js -->
@@ -488,6 +518,7 @@
 
   <body>
     <header>
+      <a href="setup.html" class="setup-btn" aria-label="Setup" target="_blank">⚙️ Setup</a>
       <div>
         <h1 id="title">OpenDVM Multimode</h1>
         <div class="subline" id="subline">
@@ -546,8 +577,9 @@
             <div class="refl-item">
               <span class="k">DMR:</span><span id="refl-dmr" class="v">----</span>
             </div>
-            <div class="refl-item">
+            <div class="refl-item refl-item--grid" id="fusionRow">
               <span class="k">Fusion:</span><span id="refl-fusion" class="v">----</span>
+              <div id="ysf-options" class="dtmf-note" style="display:none"></div>
             </div>
           </div>
         </section>
@@ -631,7 +663,7 @@
           </div>
         </section>
 
-        <!-- ⬇︎ Durchschnittliche Sendedauer pro Mode -->
+        <!-- Durchschnittliche Sendedauer pro Mode -->
         <section class="tile" style="grid-column: 1 / -1;">
           <h2>Average transmission time per mode</h2>
           <div class="chart-wrap">
@@ -639,7 +671,7 @@
           </div>
         </section>
 
-        <!-- ⬇︎ Anzahl QSOs pro Callsign (Top 10) -->
+        <!-- Anzahl QSOs pro Callsign (Top 10) -->
         <section class="tile" style="grid-column: 1 / -1;">
           <h2>Number of Transmissions per callsign (Top 10)</h2>
           <div class="chart-wrap">
@@ -647,7 +679,7 @@
           </div>
         </section>
 
-        <!-- ⬇︎ Gesamtsendezeit pro Callsign (Top 10) -->
+        <!-- Gesamtsendezeit pro Callsign (Top 10) -->
         <section class="tile" style="grid-column: 1 / -1;">
           <h2>Total transmission time per callsign (Top 10)</h2>
           <div class="chart-wrap">
@@ -673,7 +705,7 @@
       System: Debian (ProxMox VM)<br />
       Driver: G4KLX MMDVMHost and Gateways<br />
       OpenDVM: Debian &amp; GUI Integration: DJ0ABR<br />
-      External links (e.g., to qrz.com, hamqth.com) open in a new window.<br />
+      External links (e.g., to qrz.com and others) open in a new window.<br />
       When accessing these sites, the privacy policies of the respective operators apply.
     </footer>
 
@@ -920,6 +952,33 @@
           if (!r.ok) throw new Error(r.status + " " + r.statusText);
           const d = await r.json();
           if (d && typeof d === "object") renderReflector(d);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      function renderYsfOptions(cfg) {
+        const el = document.getElementById("ysf-options");
+        if (!el) return;
+
+        // api.php?q=config_inbox liefert "Options" (alias für ysf_options)
+        const txt = (cfg && (cfg.Options || cfg.ysf_options)) ? String(cfg.Options || cfg.ysf_options).trim() : "";
+
+        if (txt) {
+          el.textContent = "DG-ID: " + txt;
+          el.style.display = "block";
+        } else {
+          el.textContent = "";
+          el.style.display = "none";
+        }
+      }
+
+      async function loadYsfOptions() {
+        try {
+          const r = await fetch("api.php?q=config_inbox", { cache: "no-store" });
+          if (!r.ok) throw new Error(r.status + " " + r.statusText);
+          const cfg = await r.json();
+          renderYsfOptions(cfg);
         } catch (e) {
           console.error(e);
         }
@@ -1703,6 +1762,7 @@
       loadLastHeard();
       loadActivity();
       loadReflector();
+      loadYsfOptions();
       loadActivityByMode();
       loadActivityByModeSplit();
       loadHeatmap30d();
@@ -1724,6 +1784,7 @@
       setInterval(updateAge, 1000);
       setInterval(loadReflector, 2000);
       setInterval(loadHeatmap30d, 60000);
+      setInterval(loadYsfOptions, 5000);
     </script>
   </body>
 </html>

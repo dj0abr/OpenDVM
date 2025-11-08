@@ -2,10 +2,9 @@
     daily
     rotate 7
     compress
+    delaycompress
     missingok
     notifempty
-    create 644 mmdvm mmdvm
-    postrotate
-        systemctl kill -s HUP ircddbgateway.service >/dev/null 2>&1 || true
-    endscript
+    copytruncate
+    create 0644 mmdvm mmdvm
 }
