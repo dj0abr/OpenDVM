@@ -212,7 +212,7 @@ This file contains all site-specific settings such as callsign, frequencies, coo
    * Set Duplex = 0 (set to 1 ONLY if you are using a repeater board)
    * Set RX and TX frequencies. It is highly recommended to use differet RX and TX frequencies, otherwise you may experience issues with older D-Star Transceivers
    * Enter your Brandmeister password (as configured in SelfCare on the BM Dashboard)
-   * Enter the Config Password (default: setuppassword). You can define your own password by editing the file save_config.php (see ./gui/html).
+   * Enter the Config Password (default: setuppassword). You can define your own password by editing the file save_config.php (you find it in folder: ./gui/html, after editing copy it to /var/www/html).
    * Click "SAVE"
 
    If you receive a green confirmation message, the configuration has been successfully stored.

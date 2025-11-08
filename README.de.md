@@ -215,7 +215,7 @@ Diese Dateien enthalten alle standortspezifischen Einstellungen wie Rufzeichen, 
    * Duplex = 0 (nur auf 1 setzen, wenn du ein Repeater-Board nutzt)  
    * RX- und TX-Frequenzen einstellen. Es wird dringend empfohlen, **unterschiedliche RX- und TX-Frequenzen** zu verwenden, sonst können Probleme mit älteren D-Star-Geräten auftreten.  
    * Dein Brandmeister-Passwort eingeben (wie in *SelfCare* auf dem BM-Dashboard gesetzt).  
-   * Das Konfigurationspasswort eingeben (Standard: `setuppassword`). Eigenes Passwort kann in `save_config.php` (unter `./gui/html`) gesetzt werden.  
+   * Das Konfigurationspasswort eingeben (Standard: `setuppassword`). Eigenes Passwort kann in `save_config.php` (zu finden im Verzeichnis `./gui/html`, muss nach dem Editieren nach /var/www/html kopiert werden) gesetzt werden.  
    * Auf **SAVE** klicken.
 
    Wenn eine grüne Bestätigungsmeldung erscheint, wurde die Konfiguration erfolgreich gespeichert.
