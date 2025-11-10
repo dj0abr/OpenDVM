@@ -185,7 +185,7 @@ All site and system parameters for the G4KLX modules are stored in the following
 
 Sample versions of these files are included in this package and must be customized to match your station or repeater setup.
 
-The most important settings can be set configured the SETUP window:
+The most important settings can be configured in the SETUP window:
 
 ### Steps
 
