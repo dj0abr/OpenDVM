@@ -210,7 +210,7 @@ Die wichtigsten Einstellungen können im SETUP Fenster vorgenommen werden:
 
    Wenn eine grüne Bestätigungsmeldung erscheint, wurde die Konfiguration erfolgreich gespeichert.
 
-Die generierten Konfigurationsdateien können bei Bedarf manuell angepasst werden – in der Regel ist das aber nicht nötig.
+Du kannst die erzeugten Konfigurationsdateien bei Bedarf weiterhin manuell bearbeiten – das ist jedoch in der Regel nicht notwendig. Die einzige Einstellung, die eventuell angepasst werden muss, ist die MMDVM-Modem-Baudrate. Standardmäßig ist sie auf 115200 Bd gesetzt, was für die meisten MMDVM-Boards geeignet ist. Einige Boards (z. B. Repeater Builder Boards) benötigen jedoch 460800 Bd – siehe dazu den Abschnitt [Modem] in /etc/MMDVMHost.ini.
 
 5. **Neustart:**
    ```bash

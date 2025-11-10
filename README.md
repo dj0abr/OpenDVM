@@ -209,7 +209,7 @@ The most important settings can be configured in the SETUP window:
 
    If you receive a green confirmation message, the configuration has been successfully stored.
 
-You can still manually edit the generated configuration files if needed — but this is rarely necessary.
+You can still manually edit the generated configuration files if needed — although this is rarely necessary. The only setting you might need to adjust is the MMDVM modem baud rate. By default, it’s set to 115200 Bd, which works for most MMDVM boards. However, some boards (for example, Repeater Builder boards) may require 460800 Bd — see the [Modem] section in /etc/MMDVMHost.ini.
 
 5. **Reboot:**
    ```bash
