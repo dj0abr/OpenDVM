@@ -124,6 +124,8 @@ Installation is fully automated through **shell scripts**, which install all dep
 First, download this repository from GitHub:
 
 ```bash
+sudo apt update
+sudo apt install git -y
 git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```

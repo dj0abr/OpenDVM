@@ -126,6 +126,8 @@ Die Installation erfolgt vollständig automatisiert über **Shell-Skripte**, die
 Zuerst das Repository von GitHub herunterladen:
 
 ```bash
+sudo apt update
+sudo apt install git -y
 git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```
