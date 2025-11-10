@@ -153,7 +153,7 @@ Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
    sudo ./install_serial.sh
    ```
    - Erkennt dein serielles Gerät (USB, Onboard-UART usw.), lässt dich das richtige auswählen  
-   - Kann erneut ausgeführt werden, um ein anderes Gerät zu wählen (z. B. neue Hardware)
+   - Kann erneut ausgeführt werden, um ein anderes Gerät zu wählen (z. B. neue Hardware). In den meisten Fällen kann das angezeigte Default-Device einfach mit ENTER übernommen werden.
 
 3. **MMDVM-System und alle Gateways installieren**  
    ```bash

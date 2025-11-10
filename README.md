@@ -151,7 +151,7 @@ These scripts must be executed **in this order**.
    sudo ./install_serial.sh
    ```
    - Detects your serial device (USB, onboard UART, etc.), lets you pick the correct one
-   - re-run this script to switch to a different device (e.g. a new hardware)
+   - re-run this script to switch to a different device (e.g. a new hardware). In most cases, the shown default device is correct and can be used as is.
 
 3. **Install the MMDVM System and all Gateways**  
    - Run the script:
