@@ -186,7 +186,7 @@ Alle standort- und systembezogenen Parameter für die G4KLX-Module werden in fol
 
 Beispieldateien sind im Paket enthalten und müssen für die eigene Station angepasst werden.
 
-Diese Dateien enthalten alle standortspezifischen Einstellungen wie Rufzeichen, Frequenzen, Koordinaten und Netzparameter.
+Die wichtigsten Einstellungen können im SETUP Fenster vorgenommen werden:
 
 ### Schritte
 
