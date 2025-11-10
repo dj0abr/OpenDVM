@@ -17,7 +17,7 @@ log() { printf "[+] %s\n" "$*"; }
 warn() { printf "[!] %s\n" "$*" 1>&2; }
 die() { printf "[-] %s\n" "$*" 1>&2; exit 1; }
 
-PAUSE=1
+PAUSE=0
 DEBUG=0
 for arg in "$@"; do
   [[ "$arg" == "--no-pause" ]] && PAUSE=0
@@ -52,15 +52,49 @@ install_file() {
   fi
 }
 
+# calculate make jobs according to available ram
+# required for raspberry pi with only 1GB ram
+calc_jobs() {
+  local desired="${1:-$(nproc)}"
+  (( desired < 1 )) && desired=1
+
+  local mem_kb
+  if [[ -r /sys/fs/cgroup/memory.max ]]; then
+    local max
+    max=$(< /sys/fs/cgroup/memory.max)
+    if [[ "$max" != "max" ]]; then
+      mem_kb=$(( max / 1024 ))
+    fi
+  fi
+  if [[ -z "${mem_kb:-}" && -r /sys/fs/cgroup/memory/memory.limit_in_bytes ]]; then
+    mem_kb=$(( $(< /sys/fs/cgroup/memory/memory.limit_in_bytes) / 1024 ))
+  fi
+  if [[ -z "${mem_kb:-}" ]]; then
+    mem_kb=$(awk '/MemTotal:/ {print $2}' /proc/meminfo)
+  fi
+
+  if   (( mem_kb <= 1048576 )); then
+    echo 1
+  elif (( mem_kb <= 2097152 )); then
+    (( desired > 2 )) && echo 2 || echo "$desired"
+  else
+    echo "$desired"
+  fi
+}
+
 # Generic git clone + make build inside temp dir; optional install step
 build_from_git() {
-  local repo="$1" make_dir="$2" make_path="$3" install_cmd="$4" jobs="$5"
+  local repo="$1" make_dir="$2" make_path="$3" install_cmd="$4"
   local tmp; tmp="$(mktemp -d)"
   log "Cloning $repo into $tmp"
   pushd "$tmp" >/dev/null
   git clone --depth=1 "$repo"
-  log "Building in $make_dir with -j$jobs"
+
+  jobs="$(calc_jobs "${JOBS_DESIRED:-$(nproc)}")"
+  echo "Building in $make_dir with -j${jobs}"
   make -C "$make_dir" -j"$jobs" ${make_path:+-f "$make_path"}
+
+  #make -C "$make_dir" -j"$jobs" ${make_path:+-f "$make_path"}
   if [[ -n "$install_cmd" ]]; then
     log "Running install step"
     eval "$install_cmd"
@@ -136,12 +170,10 @@ check_serial_symlink() {
 # ------------------------------ components ----------------------------------
 install_mmdvmhost() {
   log "Installing MMDVMHost..."
-  local J; J=$(jobs_detect)
   build_from_git \
     "https://github.com/dj0abr/MMDVMHost.git" \
     "MMDVMHost" "" \
-    "install -m 755 MMDVMHost/MMDVMHost /usr/local/bin/" \
-    "$J"
+    "install -m 755 MMDVMHost/MMDVMHost /usr/local/bin/"
   install_file "configs/MMDVMHost.ini.sample" "/etc/MMDVMHost.ini" 664 "root:mmdvm"
   install_file "systemd/mmdvmhost.service" "/etc/systemd/system/mmdvmhost.service" 644
   log "MMDVMHost installed."
@@ -150,12 +182,10 @@ install_mmdvmhost() {
 install_ysfgateway() {
   log "Installing YSFGateway..."
   log "Installing YSFGateway..."
-  local J; J=$(jobs_detect)
   build_from_git \
     "https://github.com/dj0abr/YSFClients.git" \
     "YSFClients" "" \
-    "install -m 755 YSFClients/YSFGateway/YSFGateway /usr/local/bin/" \
-    "$J"
+    "install -m 755 YSFClients/YSFGateway/YSFGateway /usr/local/bin/"
   install_file "configs/ysfgateway.sample" "/etc/ysfgateway" 664 "root:mmdvm"
   install_file "systemd/ysfgateway.service" "/etc/systemd/system/ysfgateway.service" 644
   log "YSFGateway installed."
@@ -169,8 +199,7 @@ install_ircddbgateway() {
   build_from_git \
     "https://github.com/dj0abr/ircDDBGateway.git" \
     "ircDDBGateway" "" \
-    "make -C ircDDBGateway install; install -m 755 /usr/bin/ircddbgatewayd /usr/local/bin/ || true" \
-    "$J"
+    "make -C ircDDBGateway install; install -m 755 /usr/bin/ircddbgatewayd /usr/local/bin/ || true"
   install_file "configs/ircddbgateway.sample" "/etc/ircddbgateway" 664 "root:mmdvm"
   install -d -m 755 /usr/share/ircddbgateway
   chown -R mmdvm:mmdvm /usr/share/ircddbgateway
@@ -187,8 +216,7 @@ install_dmrgateway() {
   build_from_git \
     "https://github.com/dj0abr/DMRGateway.git" \
     "DMRGateway" "" \
-    "make -C DMRGateway install" \
-    "$J"
+    "make -C DMRGateway install"
   install_file "configs/dmrgateway.sample" "/etc/dmrgateway" 664 "root:mmdvm"
   install_file "systemd/dmrgateway.service" "/etc/systemd/system/dmrgateway.service" 644
   log "DMRGateway installed."

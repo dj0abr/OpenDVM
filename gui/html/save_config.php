@@ -47,7 +47,7 @@ foreach (['RXFrequency','TXFrequency'] as $hz) {
 }
 if (empty($data['Id']) || !preg_match('/^\d+$/', $data['Id'])) $errors[] = 'Id (DMR) missing/invalid';
 if ($data['Latitude'] === null || $data['Longitude'] === null || !is_numeric($data['Latitude']) || !is_numeric($data['Longitude'])) $errors[] = 'Latitude/Longitude invalid';
-if (!empty($data['URL']) && !preg_match('#^https?://#i', $data['URL'])) $errors[] = 'URL must start with http(s)';
+//if (!empty($data['URL']) && !preg_match('#^https?://#i', $data['URL'])) $errors[] = 'URL must start with http(s)';
 if ($errors) response(false, ['error' => implode('; ', $errors)]);
 
 // types

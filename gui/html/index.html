@@ -710,6 +710,20 @@
     </footer>
 
     <script>
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'opendvm:cfg_saved') location.reload();
+      });
+
+      (function(){
+        try {
+          const k = 'opendvm:cfg_saved';
+          if (localStorage.getItem(k)) {
+            localStorage.removeItem(k);
+            location.reload();
+          }
+        } catch {}
+      })();
+
       function sanitizeCallsign(cs) {
         return (cs || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
       }

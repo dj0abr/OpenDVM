@@ -174,7 +174,7 @@
           <div class="field">
             <label for="Callsign">Callsign</label>
             <input id="Callsign" name="Callsign" class="mono"
-              required pattern="^[A-Za-z0-9/]{3,}$" placeholder="YOUR_CALL" value="YOUR_CALL" />
+              required pattern="^[A-Za-z0-9/]{3,}$" placeholder="YOUR_CALL" value="YOUR_CALL" style="text-transform:uppercase"/>
             <div class="hint">Station/Repeater callsign</div>
           </div>
           <div class="field">
@@ -210,7 +210,7 @@
             <label for="RXFrequency">RXFrequency (Hz)</label>
             <input id="RXFrequency" name="RXFrequency" type="number" inputmode="numeric" class="mono"
               required min="1000000" step="1" value="431850000" />
-            <div class="hint">use different RX/TX frequencies if possible</div>
+            <div id="freq_hint" class="hint"></div>
           </div>
           <div class="field">
             <label for="TXFrequency">TXFrequency (Hz)</label>
@@ -264,7 +264,7 @@
           <div class="field">
             <label for="reflector1">reflector1</label>
             <input id="reflector1" name="reflector1" class="mono" value="DCS001" required />
-            <div class="hint">e.g. DCS001, REF001, XRF001</div>
+            <div class="hint">e.g. DCS001, DCS002 ...</div>
           </div>
           <div class="field">
             <label for="reflector_module">reflector_module</label>
@@ -361,6 +361,25 @@
   </footer>
 
   <script>
+    // Hinweis-Text für RX/TX abhängig von "Duplex"
+    (function freqHintWiring(){
+      const hint   = document.getElementById('freq_hint');
+      const duplex = document.getElementById('Duplex');
+
+      function update(){
+        if (!hint || !duplex) return;
+        hint.textContent = (duplex.value === '0')
+          ? 'RX and TX frequencies should be the same, if possible.'
+          : 'The RX and TX frequencies must differ by the repeater offset.';
+      }
+
+      duplex && duplex.addEventListener('change', update);
+      update(); // initial setzen
+
+      // Für Preload nach außen bereitstellen
+      window.__updateFreqHint = update;
+    })();
+
     // Super-simpel: Config-Passwort automatisch merken
     (function(){
       const PW_KEY = 'opendvm:config_password';
@@ -428,7 +447,23 @@
 
     // Comma/dot tolerant → normalize to dot
     function normDec(str){
-      return (str ?? '').toString().trim().replace(',', '.');
+      str = (str ?? '').toString().trim().replace(',', '.');
+
+      let s = String(str).trim();
+      // letzte Position eines Dezimaltrenners finden
+      const sepIndex = Math.max(s.lastIndexOf(','), s.lastIndexOf('.'));
+      if (sepIndex === -1) return s; // kein Trennzeichen → unverändert
+
+      const head = s.slice(0, sepIndex);     // alles vor dem Trennzeichen (bleibt unverändert)
+      const sep  = s[sepIndex];              // das tatsächliche Trennzeichen
+      const tail = s.slice(sepIndex + 1);    // alles nach dem Trennzeichen
+
+      // nur direkt folgende Ziffern als Nachkommateil nehmen
+      const m = tail.match(/^\d+/);
+      const frac = (m ? m[0] : '').slice(0, 6);
+
+      // wenn keine Ziffern danach, Trennzeichen mit entfernen
+      return frac ? head + sep + frac : head;
     }
 
     function validate(){
@@ -508,6 +543,10 @@
         state.style.color = '#e5484d';
         return;
       }
+      // callsign in Uppercase
+      const el = document.getElementById('Callsign');
+      el.value = el.value.toLocaleUpperCase('de-DE').trim();
+
       state.textContent = 'saving…';
       try{
         const body = serializeForm(form);
@@ -523,6 +562,20 @@
           state.style.color = '#5cff89';
           msg.innerHTML = `<span class="ok">OK – server accepted configuration data.</span>`;
           showSnack('Configuration saved', true);
+          try { localStorage.setItem('opendvm:cfg_saved', String(Date.now())); } catch {}
+          try {
+            if (window.opener && !window.opener.closed) {
+              window.opener.location.reload();
+            }
+          } catch (_) {}
+
+          //window.close(); // kann geblockt werden
+          setTimeout(() => { 
+            if (!document.hidden) {
+              window.close();
+              location.href = 'index.html'; 
+            }
+          }, 1500);    
         } else {
           const errTxt = (data && data.error) ? data.error : (r.status+' '+r.statusText);
           state.textContent = 'error';
@@ -596,9 +649,10 @@
         setVal('Name',          pick('Name'));
 
         // Nach dem Befüllen Default-Flags neu anwenden
+        if (window.__updateFreqHint) window.__updateFreqHint();
         if (window.__applyDefaultFlags) window.__applyDefaultFlags();
         } catch (e) {
-        console.error('preload failed', e);
+          console.error('preload failed', e);
         }
     })();
 

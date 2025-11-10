@@ -108,26 +108,6 @@ New entries are immediately detected, parsed, and written into the database.
 
 ---
 
-## 🍓 Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)
-
-### Serial Interface
-
-**The following does NOT apply to USB-MMDVM boards.**
-
-On a Pi 3/4 or 5, the onboard Bluetooth uses the primary PL011 UART by default. To free the GPIO UART for the MMDVM HAT, disable Bluetooth and enable the UART.
-
-1. **Edit the boot config**  
-   *(Bookworm and newer: `/boot/firmware/config.txt`; older releases: `/boot/config.txt`)*
-   ```ini
-   enable_uart=1
-   dtoverlay=pi3-disable-bt
-   ```
-
-2. **Disable Bluetooth and reboot:**
-   ```bash
-   sudo systemctl disable --now bluetooth
-   sudo reboot
-   ```
 ### Duplex
 
 There are two types of MMDVM HATs:
@@ -139,7 +119,7 @@ The “Duplex” setting must match the hardware in use; otherwise, operation ma
 
 ## 🧰 Installation & Dependencies
 
-Installation is fully automated through **two shell scripts**, which install all dependencies, programs, and configuration files.
+Installation is fully automated through **shell scripts**, which install all dependencies, programs, and configuration files.
 
 First, download this repository from GitHub:
 
@@ -148,15 +128,24 @@ git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```
 
-Now run the two scripts (all with sudo) as follows:
+Now run the scripts (all with sudo) as follows:
 
 ### Installation Order
 
 👉 **Important:**  
 These scripts must be executed **in this order**.
 
-1. **Install the serial port**  
-   - If you’re using a Raspberry Pi with an MMDVM HAT, review the chapter “Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)” before continuing.
+1. **for Raspberry PI with MMDVM HAT ONLY**
+   - Skip this section if you **don’t use a Raspberry Pi** or if your MMDVM is connected **via USB**. In that case, go directly to **2. Install the serial port.**
+   - If you **do** have a Raspberry Pi with an **MMDVM HAT mounted directly on the GPIO header**, you need to **enable the internal serial port**. 
+   Run the following command and reboot afterward:
+   ```bash
+   sudo ./install_raspi.sh
+   sudo reboot
+   ```
+   - After reboot continue with **2. Install the serial port**
+
+2. **Install the serial port**  
    - Run the script:
    ```bash
    sudo ./install_serial.sh
@@ -164,7 +153,7 @@ These scripts must be executed **in this order**.
    - Detects your serial device (USB, onboard UART, etc.), lets you pick the correct one
    - re-run this script to switch to a different device (e.g. a new hardware)
 
-2. **Install the MMDVM System and all Gateways**  
+3. **Install the MMDVM System and all Gateways**  
    - Run the script:
    ```bash
    sudo ./install.sh

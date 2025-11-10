@@ -108,28 +108,6 @@ Neue Einträge werden sofort erkannt, ausgewertet und in die Datenbank geschrieb
 
 ---
 
-## 🍓 Raspberry Pi 3/4/5 + MMDVM HAT (headless Raspberry Pi OS)
-
-### Serielle Schnittstelle
-
-**Dies gilt NICHT für USB-MMDVM-Boards.**
-
-Auf einem Pi 3/4 oder 5 verwendet das Onboard-Bluetooth standardmäßig die primäre PL011-UART.  
-Um die GPIO-UART für das MMDVM-HAT freizugeben, muss Bluetooth deaktiviert und die UART aktiviert werden.
-
-1. **Boot-Konfiguration bearbeiten**  
-   *(Bookworm und neuer: `/boot/firmware/config.txt`; ältere Releases: `/boot/config.txt`)*
-   ```ini
-   enable_uart=1
-   dtoverlay=pi3-disable-bt
-   ```
-
-2. **Bluetooth deaktivieren und neu starten:**
-   ```bash
-   sudo systemctl disable --now bluetooth
-   sudo reboot
-   ```
-
 ### Duplex
 
 Es gibt zwei Arten von MMDVM-HATs:
@@ -143,7 +121,7 @@ Die Einstellung „Duplex“ muss zur verwendeten Hardware passen, sonst funktio
 
 ## 🧰 Installation & Abhängigkeiten
 
-Die Installation erfolgt vollständig automatisiert über **zwei Shell-Skripte**, die alle Abhängigkeiten, Programme und Konfigurationsdateien installieren.
+Die Installation erfolgt vollständig automatisiert über **Shell-Skripte**, die alle Abhängigkeiten, Programme und Konfigurationsdateien installieren.
 
 Zuerst das Repository von GitHub herunterladen:
 
@@ -152,15 +130,24 @@ git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```
 
-Jetzt die beiden Skripte (alle mit sudo) in folgender Reihenfolge ausführen:
+Jetzt die Skripte (alle mit sudo) in folgender Reihenfolge ausführen:
 
 ### Installationsreihenfolge
 
 👉 **Wichtig:**  
 Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
 
-1. **Serielle Schnittstelle installieren**  
-   - Wenn du einen Raspberry Pi mit MMDVM-HAT verwendest, lies zuerst das Kapitel „Raspberry Pi 3/4/5 + MMDVM HAT“.  
+1. **NUR für Raspberry PI mit MMDVM HAT**
+   - Überspringe diesen Abschnitt, wenn du **keinen Raspberry Pi** verwendest oder dein MMDVM **per USB** angeschlossen ist. In diesem Fall fahre direkt fort mit **2. Serielle Schnittstelle installieren**.
+   - Wenn du einen **Raspberry Pi mit direkt aufgestecktem MMDVM HAT** besitzt, musst du die **interne serielle Schnittstelle aktivieren**.
+   Führe dazu folgendes Skript aus und starte anschließend neu:
+   ```bash
+   sudo ./install_raspi.sh
+   sudo reboot
+   ```
+   - Nach dem Neustart fahre fort mit **2. Serielle Schnittstelle installieren**.
+
+2. **Serielle Schnittstelle installieren**  
    - Skript ausführen:
    ```bash
    sudo ./install_serial.sh
@@ -168,7 +155,7 @@ Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
    - Erkennt dein serielles Gerät (USB, Onboard-UART usw.), lässt dich das richtige auswählen  
    - Kann erneut ausgeführt werden, um ein anderes Gerät zu wählen (z. B. neue Hardware)
 
-2. **MMDVM-System und alle Gateways installieren**  
+3. **MMDVM-System und alle Gateways installieren**  
    ```bash
    sudo ./install.sh
    ```
