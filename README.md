@@ -16,7 +16,7 @@ It uses the following G4KLX repositories:
 - [DMRGateway](https://github.com/g4klx/DMRGateway)  
 - [YSFClient](https://github.com/g4klx/YSFClients) *(used as a gateway)*  
 
-The **entire installation** is automated through **five shell scripts** that correctly set up all components.  
+The **entire installation** is automated through **shell scripts** that correctly set up all components.  
 
 Additionally, the project includes a **logfile parser** that reads all operational data from MMDVM, YSF, and DMR logs and writes them into a **MariaDB database**.  
 These data serve as the backend for a modern **web dashboard** that displays the repeater or hotspot status in real time.
@@ -202,7 +202,7 @@ The most important settings can be configured in the SETUP window:
    * Your callsign
    * Your DMR ID (if required, click the link below the DMR ID field to open the DMR database)
    * Set Duplex = 0 (set to 1 ONLY if you are using a repeater board)
-   * Set RX and TX frequencies. It is highly recommended to use differet RX and TX frequencies, otherwise you may experience issues with older D-Star Transceivers
+   * Set RX and TX frequencies. For **Hotspots use the same RX and TX frequency**, otherwise DMR networking will not work. For **Repeaters use different RX and TX frequencies**.
    * Enter your Brandmeister password (as configured in SelfCare on the BM Dashboard)
    * Enter the Config Password (default: setuppassword). You can define your own password by editing the file save_config.php (you find it in folder: ./gui/html, after editing copy it to /var/www/html).
    * Click "SAVE"

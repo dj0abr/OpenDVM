@@ -203,7 +203,7 @@ Die wichtigsten Einstellungen können im SETUP Fenster vorgenommen werden:
    * Dein Rufzeichen  
    * Deine DMR-ID (falls nötig, auf den Link unter dem DMR-ID-Feld klicken, um die DMR-Datenbank zu öffnen)  
    * Duplex = 0 (nur auf 1 setzen, wenn du ein Repeater-Board nutzt)  
-   * RX- und TX-Frequenzen einstellen. Es wird dringend empfohlen, **unterschiedliche RX- und TX-Frequenzen** zu verwenden, sonst können Probleme mit älteren D-Star-Geräten auftreten.  
+   * RX- und TX-Frequenzen einstellen. Für Hotspots benutze die gleiche RX und TX Frequenz, oder die DMR Netzwerkverbindung würde nicht funktionieren. Für Repeater benutze unterschiedliche RX und TX Frequenzen.  
    * Dein Brandmeister-Passwort eingeben (wie in *SelfCare* auf dem BM-Dashboard gesetzt).  
    * Das Konfigurationspasswort eingeben (Standard: `setuppassword`). Eigenes Passwort kann in `save_config.php` (zu finden im Verzeichnis `./gui/html`, muss nach dem Editieren nach /var/www/html kopiert werden) gesetzt werden.  
    * Auf **SAVE** klicken.
