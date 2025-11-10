@@ -53,6 +53,7 @@ This project was originally developed for the MMDVM Repeater Builder board used 
 **Main features:**
 
 - Real-time monitoring of MMDVMHost, YSFGateway, and DMRGateway logs  
+- D-Star Transceiver work in Repeater AND Simplex mode. The dup-, shift 0 hack is no more required
 - Automatic storage of detected events in MariaDB  
 - Graphical presentation via a modern web frontend  
 - Central configuration through a unified `site.conf` file  

@@ -53,6 +53,7 @@ Das Projekt wurde ursprünglich für das MMDVM Repeater Builder Board des DB0SL-
 **Hauptfunktionen:**
 
 - Echtzeitüberwachung der Logs von MMDVMHost, YSFGateway und DMRGateway  
+- D-Star Transceiver können jetzt auf im Simplex Modus betrieben werden, der frühere Hack mit Duplex- und Shift 0 ist nicht mehr erforderlich
 - Automatische Speicherung erkannter Ereignisse in MariaDB  
 - Grafische Darstellung über ein modernes Web-Frontend  
 - Zentrale Konfiguration über eine einheitliche `site.conf`  
