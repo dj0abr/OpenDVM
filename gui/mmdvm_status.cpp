@@ -43,6 +43,7 @@ struct ParsedResult {
     std::string source;    // RF, NET oder "-"
     std::string callsign;  // ggf. leer
     std::optional<int> dgId;
+    std::optional<int> slot;
     std::optional<double> durationSec;
     std::optional<double> berPct;
     std::optional<std::string> info;   // für z. B. "Verlinkt zu DCS001 R"
@@ -53,6 +54,7 @@ struct TransmissionState {
     std::string source;   // RF / NET
     std::string callsign;
     std::optional<int> dgId;
+    std::optional<int> slot;
     std::chrono::system_clock::time_point startTp;
     std::string openedLine; // zur Info
 };
@@ -338,10 +340,10 @@ public:
         );
 
         // --- DMR ---
-        rx.dmr_netStart   = std::regex(R"(DMR\s+Slot\s+\d+,\s+received\s+network\s+voice\s+header\s+from\s+(\S+)\s+to\s+TG\s+(\d+))");
-        rx.dmr_netEnd     = std::regex(R"(DMR\s+Slot\s+\d+,\s+received\s+network\s+end\s+of\s+voice\s+transmission\s+from\s+(\S+)\s+to\s+TG\s+(\d+),\s*([\d.]+)\s+seconds,.*?BER:\s*([\d.]+)%)");
-        rx.dmr_rfStart    = std::regex(R"(DMR\s+Slot\s+\d+,\s+received\s+RF\s+voice\s+header\s+from\s+(\S+)\s+to\s+TG\s+(\d+))");
-        rx.dmr_rfEnd      = std::regex(R"(DMR\s+Slot\s+\d+,\s+received\s+RF\s+end\s+of\s+voice\s+transmission\s+from\s+(\S+)\s+to\s+TG\s+(\d+),\s*([\d.]+)\s+seconds,\s*BER:\s*([\d.]+)%)");
+        rx.dmr_netStart   = std::regex(R"(DMR\s+Slot\s+(\d+),\s+received\s+network\s+voice\s+header\s+from\s+(\S+)\s+to\s+TG\s+(\d+))");
+        rx.dmr_netEnd     = std::regex(R"(DMR\s+Slot\s+(\d+),\s+received\s+network\s+end\s+of\s+voice\s+transmission\s+from\s+(\S+)\s+to\s+TG\s+(\d+),\s*([\d.]+)\s+seconds,.*?BER:\s*([\d.]+)%)");
+        rx.dmr_rfStart    = std::regex(R"(DMR\s+Slot\s+(\d+),\s+received\s+RF\s+voice\s+header\s+from\s+(\S+)\s+to\s+TG\s+(\d+))");
+        rx.dmr_rfEnd      = std::regex(R"(DMR\s+Slot\s+(\d+),\s+received\s+RF\s+end\s+of\s+voice\s+transmission\s+from\s+(\S+)\s+to\s+TG\s+(\d+),\s*([\d.]+)\s+seconds,\s*BER:\s*([\d.]+)%)");
 
         // --- Allgemein ---
         rx.modeIdle       = std::regex(R"(Mode\s+set\s+to\s+Idle)");
@@ -527,17 +529,31 @@ public:
         {
             std::smatch m;
             if (std::regex_search(line, m, rx.dmr_netStart)) {
-                return handleStart(line, ts, "DMR", "NET", m[1].str(), std::nullopt);
+                int slot = std::stoi(m[1].str());
+                std::string cs = m[2].str();
+                int tg = std::stoi(m[3].str());
+                return handleStart(line, ts, "DMR", "NET", cs, tg, slot);
             }
             if (std::regex_search(line, m, rx.dmr_netEnd)) {
-                return handleEnd(line, ts, "DMR", "NET", m[1].str(), std::nullopt, toDouble(m[3].str()), toDouble(m[4].str()));
-            }
+                int slot = std::stoi(m[1].str());
+                std::string cs = m[2].str();
+                int tg = std::stoi(m[3].str());
+                double dur = toDouble(m[4].str());
+                double ber = toDouble(m[5].str());
+                return handleEnd(line, ts, "DMR", "NET", cs, tg, dur, ber, slot);            }
             if (std::regex_search(line, m, rx.dmr_rfStart)) {
-                return handleStart(line, ts, "DMR", "RF", m[1].str(), std::nullopt);
+                int slot = std::stoi(m[1].str());
+                std::string cs = m[2].str();
+                int tg = std::stoi(m[3].str());
+                return handleStart(line, ts, "DMR", "RF", cs, tg, slot);
             }
             if (std::regex_search(line, m, rx.dmr_rfEnd)) {
-                return handleEnd(line, ts, "DMR", "RF", m[1].str(), std::nullopt, toDouble(m[3].str()), toDouble(m[4].str()));
-            }
+                int slot = std::stoi(m[1].str());
+                std::string cs = m[2].str();
+                int tg = std::stoi(m[3].str());
+                double dur = toDouble(m[4].str());
+                double ber = toDouble(m[5].str());
+                return handleEnd(line, ts, "DMR", "RF", cs, tg, dur, ber, slot);            }
         }
 
         // sonst nicht relevant
@@ -630,6 +646,7 @@ private:
         res.source = open_->source;
         res.callsign = open_->callsign;
         res.dgId = open_->dgId;
+        res.slot = open_->slot;
 
         if (ts.has_value()) {
             auto d = std::chrono::duration_cast<std::chrono::milliseconds>(ts.value() - open_->startTp).count();
@@ -656,7 +673,8 @@ private:
                 const std::string& mode,
                 const std::string& source,
                 const std::string& callsign,
-                std::optional<int> dgId) {
+                std::optional<int> dgId,
+                std::optional<int> slotId = std::nullopt) {
                     
         std::string cs = sanitizeCallsign(callsign);
         if (!cs.empty() && !isValidCallsign(cs)) return std::nullopt;
@@ -677,7 +695,8 @@ private:
         }
 
         auto stp = ts.value_or(std::chrono::system_clock::now());
-        open_ = TransmissionState{mode, source, cs, dgId, stp, line};
+        //open_ = TransmissionState{mode, source, cs, dgId, stp, line};
+        open_ = TransmissionState{mode, source, cs, dgId, slotId, stp, line};
 
         ParsedResult res;
         res.originalLine = line;
@@ -686,6 +705,7 @@ private:
         res.source = source;
         res.callsign = cs;
         res.dgId = dgId;
+        res.slot = slotId;
         res.durationSec = std::nullopt;
         res.berPct = std::nullopt;
 
@@ -701,7 +721,8 @@ private:
             const std::string& callsign,
             std::optional<int> dgId,
             std::optional<double> durationSec,
-            std::optional<double> berPct) {
+            std::optional<double> berPct,
+            std::optional<int> slotId = std::nullopt) {
 
         std::string cs = sanitizeCallsign(callsign);
         if (!cs.empty() && !isValidCallsign(cs)) return std::nullopt;
@@ -718,11 +739,17 @@ private:
         // nimm die Werte aus der offenen Übertragung, wenn vorhanden.
         std::string outCallsign = cs;
         std::optional<int> outDgId = dgId;
+        std::optional<int> outSlot = slotId;
 
-        if (outCallsign.empty() && open_) {
+        /*if (outCallsign.empty() && open_) {
             outCallsign = open_->callsign;
             if (!outDgId.has_value()) outDgId = open_->dgId;
-        }
+        }*/
+       if (open_) {
+            if (outCallsign.empty()) outCallsign = open_->callsign;
+            if (!outDgId.has_value()) outDgId = open_->dgId;
+            if (!outSlot.has_value()) outSlot = open_->slot;
+         }
 
         // Offene Session schließen, egal ob passend
         if (open_) open_.reset();
@@ -734,6 +761,7 @@ private:
         res.source = source;
         res.callsign = outCallsign;
         res.dgId = outDgId;
+        res.slot = outSlot;
         res.durationSec = durationSec;
         res.berPct = berPct;
         return res;
@@ -763,8 +791,8 @@ static void printResult(const ParsedResult& r) {
     // Callsign/DG-ID nur wenn vorhanden/sinnvoll
     if (!r.callsign.empty())
         std::cout << ", Callsign=" << (r.callsign.empty() ? "-" : r.callsign);
-    if (r.dgId.has_value())
-        std::cout << ", DG-ID=" << *r.dgId;
+    if (r.dgId.has_value())  std::cout << ", DG-ID=" << *r.dgId;
+    if (r.slot.has_value())  std::cout << ", Slot="  << *r.slot;
 
     // Dauer/BER wenn vorhanden
     if (r.durationSec.has_value())
@@ -829,16 +857,17 @@ public:
     }
 
     // ---- High-level Actions ----
-    void upsertStatus(const std::string& mode,
-                      const std::string& callsign,
-                      const std::optional<int>& dgid,
-                      const std::optional<std::string>& source, // "RF"/"NET"/null
-                      bool active,
-                      const std::optional<double>& ber,
-                      const std::optional<double>& duration) {
+void upsertStatus(const std::string& mode,
+                  const std::string& callsign,
+                  const std::optional<int>& dgid,
+                  const std::optional<int>& slot,
+                  const std::optional<std::string>& source,
+                  bool active,
+                  const std::optional<double>& ber,
+                  const std::optional<double>& duration) {
         if (!ensure_conn() || !st_upsert_status) return;
 
-        MYSQL_BIND b[8]{}; // mode, callsign, dgid, source, active, ber, duration, NOW()
+        MYSQL_BIND b[9]{}; // mode, callsign, dgid, slot, source, active, ber, duration, NOW()
         // 1) mode
         Scratch s1(mode);
         b[0] = s1.bind_str();
@@ -848,20 +877,23 @@ public:
         // 3) dgid (nullable)
         NullableInt ni(dgid);
         b[2] = ni.bind_int();
-        // 4) source (nullable)
+        // 4) slot
+        NullableInt nslot(slot);          
+        b[3] = nslot.bind_int();
+        // 5) source (nullable)
         Scratch s4(source.value_or(""));
         NullableStr ns4(source.has_value());
-        b[3] = ns4.bind_str(s4);
+        b[4] = ns4.bind_str(s4);
         // 5) active (tinyint)
         my_bool active_flag = active ? 1 : 0;
-        b[4].buffer_type = MYSQL_TYPE_TINY;
-        b[4].buffer = &active_flag;
+        b[5].buffer_type = MYSQL_TYPE_TINY;
+        b[5].buffer = &active_flag;
         // 6) ber (nullable double)
         NullableDouble nb(ber);
-        b[5] = nb.bind_double();
+        b[6] = nb.bind_double();
         // 7) duration (nullable double)
         NullableDouble nd(duration);
-        b[6] = nd.bind_double();
+        b[7] = nd.bind_double();
         // 8) updated_at = NOW() → kein Bind nötig (im SQL)
 
         if (mysql_stmt_bind_param(st_upsert_status, b) != 0) {
@@ -873,21 +905,23 @@ public:
         }
     }
 
-    void insertLastHeard(const std::string& callsign,
-                         const std::string& mode,
-                         const std::optional<int>& dgid,
-                         const std::optional<std::string>& source, // "RF"/"NET"/null
-                         const std::optional<double>& duration,
-                         const std::optional<double>& ber) {
+void insertLastHeard(const std::string& callsign,
+                     const std::string& mode,
+                     const std::optional<int>& dgid,
+                     const std::optional<int>& slot,
+                     const std::optional<std::string>& source,
+                     const std::optional<double>& duration,
+                     const std::optional<double>& ber) {
         if (!ensure_conn() || !st_insert_lastheard) return;
 
-        MYSQL_BIND b[6]{};
+        MYSQL_BIND b[7]{};
         Scratch s1(callsign); b[0] = s1.bind_str();
         Scratch s2(mode);     b[1] = s2.bind_str();
         NullableInt ni(dgid); b[2] = ni.bind_int();
-        Scratch s4(source.value_or("")); NullableStr ns4(source.has_value()); b[3] = ns4.bind_str(s4);
-        NullableDouble nd(duration); b[4] = nd.bind_double();
-        NullableDouble nb(ber);      b[5] = nb.bind_double();
+        NullableInt nslot(slot);          b[3] = nslot.bind_int();
+        Scratch s4(source.value_or(""));  NullableStr ns4(source.has_value()); b[4] = ns4.bind_str(s4);
+        NullableDouble nd(duration);      b[5] = nd.bind_double();
+        NullableDouble nb(ber);           b[6] = nb.bind_double();
 
         if (mysql_stmt_bind_param(st_insert_lastheard, b) != 0) {
             dlog("[DB  ] bind insert lastheard failed: ", mysql_stmt_error(st_insert_lastheard));
@@ -914,19 +948,19 @@ public:
         if (r.startEnd == "Start") {
             upsertStatus(
                 r.mode, r.callsign,
-                r.dgId,
+                r.dgId, r.slot,
                 std::optional<std::string>(r.source.empty() ? "" : r.source),
                 true, std::nullopt, std::nullopt
             );
         } else if (r.startEnd == "Ende") {
             // lastheard + status inactive
             insertLastHeard(
-                r.callsign, r.mode, r.dgId,
+                r.callsign, r.mode, r.dgId,r.slot,
                 std::optional<std::string>(r.source.empty() ? "" : r.source),
                 r.durationSec, r.berPct
             );
             upsertStatus(
-                r.mode, r.callsign, r.dgId,
+                r.mode, r.callsign, r.dgId,r.slot,
                 std::optional<std::string>(r.source.empty() ? "" : r.source),
                 false, r.berPct, r.durationSec
             );
@@ -934,7 +968,7 @@ public:
             if (r.mode == "Idle") {
                 // Nur Idle: Status auf inactive setzen und Felder leeren
                 upsertStatus(
-                    r.mode, "", std::nullopt,
+                    r.mode, "", std::nullopt,std::nullopt,
                     std::nullopt, false, std::nullopt, std::nullopt
                 );
             } else {
@@ -1000,6 +1034,7 @@ private:
             " callsign VARCHAR(20),"
             " mode VARCHAR(20),"
             " dgid INT NULL,"
+            " slot TINYINT NULL,"
             " source ENUM('RF','NET') NULL,"
             " duration FLOAT,"
             " ber FLOAT,"
@@ -1013,6 +1048,7 @@ private:
             " mode VARCHAR(20),"
             " callsign VARCHAR(20),"
             " dgid INT NULL,"
+            " slot TINYINT NULL,"
             " source ENUM('RF','NET') NULL,"
             " active BOOL,"
             " ber FLOAT,"
@@ -1035,8 +1071,8 @@ private:
                           "VALUES (1,NULL,NULL,NULL,NOW());");
 
         prepare_statements();
-        mysql_query(conn, "INSERT IGNORE INTO status (id,mode,callsign,dgid,source,active,ber,duration,updated_at) "
-                          "VALUES (1,'Idle','',NULL,'RF',0,NULL,NULL,NOW());");
+        mysql_query(conn, "INSERT IGNORE INTO status (id,mode,callsign,dgid,slot,source,active,ber,duration,updated_at) "
+                   "VALUES (1,'Idle','',NULL,NULL,'RF',0,NULL,NULL,NOW());");
         return true;
     }
 
@@ -1044,10 +1080,10 @@ private:
         destroy_statements();
 
         const char* ps1 =
-            "INSERT INTO status (id, mode, callsign, dgid, source, active, ber, duration, updated_at) "
-            "VALUES (1, ?, ?, ?, ?, ?, ?, ?, NOW()) "
+            "INSERT INTO status (id, mode, callsign, dgid, slot, source, active, ber, duration, updated_at) "
+            "VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, NOW()) "
             "ON DUPLICATE KEY UPDATE "
-            " mode=VALUES(mode), callsign=VALUES(callsign), dgid=VALUES(dgid), source=VALUES(source), "
+            " mode=VALUES(mode), callsign=VALUES(callsign), dgid=VALUES(dgid), slot=VALUES(slot), source=VALUES(source), "
             " active=VALUES(active), ber=VALUES(ber), duration=VALUES(duration), updated_at=NOW();";
 
         st_upsert_status = mysql_stmt_init(conn);
@@ -1057,8 +1093,8 @@ private:
         }
 
         const char* ps2 =
-            "INSERT INTO lastheard (callsign, mode, dgid, source, duration, ber, ts) "
-            "VALUES (?, ?, ?, ?, ?, ?, NOW());";
+            "INSERT INTO lastheard (callsign, mode, dgid, slot, source, duration, ber, ts) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, NOW());";
 
         st_insert_lastheard = mysql_stmt_init(conn);
         if (!st_insert_lastheard || mysql_stmt_prepare(st_insert_lastheard, ps2, (unsigned long)strlen(ps2)) != 0) {

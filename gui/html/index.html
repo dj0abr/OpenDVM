@@ -574,8 +574,9 @@
               <span id="refl-dstar" class="v">----</span>
               <div id="dtmf-indicator" class="dtmf-note">DTMF active</div>
             </div>
-            <div class="refl-item">
+            <div class="refl-item refl-item--grid" id="dmrRow">
               <span class="k">DMR:</span><span id="refl-dmr" class="v">----</span>
+              <div id="dmr-tgs" class="dtmf-note" style="display:none"></div>
             </div>
             <div class="refl-item refl-item--grid" id="fusionRow">
               <span class="k">Fusion:</span><span id="refl-fusion" class="v">----</span>
@@ -595,7 +596,7 @@
               <span class="k">Duration (last TX)</span><span id="dur" class="v">–</span>
             </div>
             <div class="kv">
-              <span class="k">DG-ID</span><span id="dgid" class="v">–</span>
+              <span class="k">DG-ID/TG</span><span id="dgid" class="v">–</span>
             </div>
             <div class="kv">
               <span class="k">Source</span><span id="source" class="v">–</span>
@@ -820,7 +821,24 @@
         els.activeDot.classList.toggle("on", active);
         els.ber.textContent = d.ber == null ? "–----" : String(d.ber) + " %";
         els.dur.textContent = d.duration == null ? "–" : String(d.duration) + " s";
-        els.dgid.textContent = d.dgid == null ? "–" : String(d.dgid);
+
+        // DG-ID/TG: für DMR → "TSx/TGy", für YSF → "DG-ID", sonst "–"
+        (function(){
+          const mode = String(d.mode || "").toUpperCase();
+          const hasDG   = d.dgid != null && d.dgid !== "";
+          const hasSlot = d.slot != null && d.slot !== "";
+          let txt = "–";
+          if (mode.startsWith("DMR")) {
+            const ts = hasSlot ? `TS${d.slot}` : "TS–";
+            const tg = hasDG   ? `TG${d.dgid}` : "TG–";
+            txt = `${ts}/${tg}`;                        // z.B. TS2/TG26384
+          } else if (mode.includes("YSF") || mode.includes("FUSION")) {
+            txt = hasDG ? `DG${d.dgid}` : "–";          // YSF: DG-ID
+          } else {
+            txt = hasDG ? String(d.dgid) : "–";         // Fallback
+          }
+          els.dgid.textContent = txt;
+        })();
         els.source.textContent = d.source || "–";
         els.upd.textContent = d.updated_at ?? "–";
 
@@ -877,7 +895,14 @@
           // Mode + (optional DG-ID) als Text
           const modeParts = [];
           modeParts.push(r.mode || "–");
-          if (r.dgid != null) modeParts.push(`DG${r.dgid}`);
+          if (r.dgid != null) {
+            if ((r.mode || "").toUpperCase().startsWith("DMR")) {
+              const ts = (r.slot != null) ? `TS${r.slot}/` : "";
+              modeParts.push(`${ts}TG${r.dgid}`);
+            } else {
+              modeParts.push(`DG${r.dgid}`);
+            }
+          }
           md.textContent = modeParts.join(" ");
 
           // Source-Badge (RF/NET) als separater Chip
@@ -1155,18 +1180,34 @@
           const r = await fetch("api.php?q=heatmap30d", { cache: "no-store" });
           if (!r.ok) throw new Error(r.status + " " + r.statusText);
           const rows = await r.json();
+          const data = (Array.isArray(rows) ? rows : []).map((x) => ({
+            x: Number(x.hh),
+            y: Number(x.dow),
+            v: Number(x.cnt) || 0,
+          }));
 
           // day labels (1=Sun ... 7=Sat)
           const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
           // Normiere Daten auf Chart.js-Matrix-Format
-          const data = rows.map((x) => ({
+          /*const data = rows.map((x) => ({
             x: x.hh, // Stunde
             y: x.dow, // Wochentag
             v: x.cnt,
-          }));
+          }));*/
 
-          const maxVal = Math.max(...data.map((d) => d.v), 1);
+          //const maxVal = Math.max(...data.map((d) => d.v), 1);
+          const maxVal = Math.max(1, ...data.map((d) => d.v || 0));
+
+          const makeBg = (ctx) => {
+            // ctx.raw ist bei manchen internen Aufrufen nicht vorhanden → fallback
+            const raw = ctx && ctx.raw ? ctx.raw : { v: 0 };
+            const v = Number(raw.v) || 0;
+            const alpha = v / maxVal;
+            // clamp Alpha ein wenig, damit 0 nicht unsichtbar ist
+            const a = Math.max(0.15, Math.min(1, 0.15 + alpha * 0.85));
+            return `rgba(46, 166, 255, ${a})`;
+          };
 
           const ctx = document.getElementById("heatmapChart").getContext("2d");
           if (!heatmapChart) {
@@ -1177,11 +1218,7 @@
                   {
                     label: "Activity",
                     data: data,
-                    backgroundColor(ctx) {
-                      const v = ctx.raw.v;
-                      const alpha = v / maxVal;
-                      return `rgba(46, 166, 255, ${0.15 + alpha * 0.85})`;
-                    },
+                    backgroundColor: makeBg,
                     borderWidth: 1,
                     borderColor: "#1a1f24",
                     // 🔹 sichere Variante: prüfe, ob chartArea schon existiert
@@ -1244,6 +1281,7 @@
             });
           } else {
             heatmapChart.data.datasets[0].data = data;
+            heatmapChart.data.datasets[0].backgroundColor = makeBg;
             heatmapChart.update("none");
           }
         } catch (e) {
@@ -1765,6 +1803,71 @@
         setTimeout(() => map.invalidateSize(), 50);
       }
 
+      function renderBmTgs(d) {
+        const el = document.getElementById("dmr-tgs");
+        if (!el) return;
+
+        const s1 = d?.static?.TS1 || [];
+        const s2 = d?.static?.TS2 || [];
+        const y1 = d?.dynamic?.TS1 || [];
+        const y2 = d?.dynamic?.TS2 || [];
+
+        // Hilfsfunktion: "TSx: 26280, 26282"
+        const rowText = (label, arr) => (arr.length ? `${label} ${arr.join(", ")}` : null);
+
+        const staticParts  = [rowText("TS1:", s1), rowText("TS2:", s2)].filter(Boolean);
+        const dynamicParts = [rowText("TS1:", y1), rowText("TS2:", y2)].filter(Boolean);
+
+        const chunks = [];
+        if (staticParts.length) chunks.push(`Sta. ${staticParts.join("  •  ")}`);
+        if (dynamicParts.length) chunks.push(`Dyn. ${dynamicParts.join("  •  ")}`);
+
+        const txt = chunks.join("   |   ");
+
+        el.textContent = txt;
+        el.style.display = txt ? "block" : "none";
+      }
+
+      async function loadBmTgs() {
+        const el = document.getElementById("dmr-tgs");
+        if (!el) return;
+
+        try {
+          const r = await fetch("api.php?q=bm_tgs", { cache: "no-store" });
+
+          // JSON immer versuchen, auch bei !ok
+          let payload = null;
+          try { payload = await r.json(); } catch {}
+
+          if (!r.ok) {
+            // fehlender oder invalider Key ➜ "no API key" anzeigen
+            const code = (payload && payload.error_code) ? String(payload.error_code) : "";
+            if (r.status === 400 && code === "NO_API_KEY") {
+              el.textContent = "no API key";
+              el.style.display = "block";
+              return;
+            }
+            if ((r.status === 401 || r.status === 403) && code === "BAD_API_KEY") {
+              el.textContent = "no API key";
+              el.style.display = "block";
+              return;
+            }
+            // andere Fehler: Hinweis optional ausblenden oder neutral anzeigen
+            el.textContent = "";
+            el.style.display = "none";
+            return;
+          }
+
+          // Erfolg: normale Darstellung
+          renderBmTgs(payload);
+        } catch (e) {
+          console.error(e);
+          // Netzwerkfehler etc. -> unaufdringlich verstecken
+          const el = document.getElementById("dmr-tgs");
+          if (el) { el.textContent = ""; el.style.display = "none"; }
+        }
+      }
+
       // Bei Resize (mobil/Rotation): Karte neu layouten
       window.addEventListener("resize", () => {
         if (map) setTimeout(() => map.invalidateSize(), 100);
@@ -1776,6 +1879,7 @@
       loadLastHeard();
       loadActivity();
       loadReflector();
+      loadBmTgs();
       loadYsfOptions();
       loadActivityByMode();
       loadActivityByModeSplit();
@@ -1797,6 +1901,7 @@
       setInterval(loadActivityByModeSplit, 60000);
       setInterval(updateAge, 1000);
       setInterval(loadReflector, 2000);
+      setInterval(loadBmTgs, 5000);
       setInterval(loadHeatmap30d, 60000);
       setInterval(loadYsfOptions, 5000);
     </script>

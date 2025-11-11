@@ -30,7 +30,7 @@ $expected = [
   'Callsign','Module','Id','Duplex','RXFrequency','TXFrequency',
   'Latitude','Longitude','Height','Location','Description','URL',
   'reflector1','reflector_module','Suffix','Startup','Options',
-  'Address','Password','Name'
+  'Address','Password','Name', 'BmApiKey'
 ];
 
 // collect
@@ -81,13 +81,13 @@ try {
       id, callsign, module, dmr_id, duplex, rxfreq, txfreq, latitude, longitude, height,
       location, description, url, reflector1, 
       ysf_suffix, ysf_startup, ysf_options,
-      dmr_address, dmr_password, dmr_name,
+      dmr_address, dmr_password, dmr_name,bm_api_key,
       is_new
     ) VALUES (
       1, :callsign, :module, :dmr_id, :duplex, :rxfreq, :txfreq, :latitude, :longitude, :height,
       :location, :description, :url, :reflector1, 
       :ysf_suffix, :ysf_startup, :ysf_options,
-      :dmr_address, :dmr_password, :dmr_name,
+      :dmr_address, :dmr_password, :dmr_name,:bm_api_key,
       'GUI'
     )
     ON DUPLICATE KEY UPDATE
@@ -110,6 +110,7 @@ try {
       dmr_address      = VALUES(dmr_address),
       dmr_password     = VALUES(dmr_password),
       dmr_name         = VALUES(dmr_name),
+      bm_api_key       = VALUES(bm_api_key),
       is_new           = 'GUI',
       updated_at       = CURRENT_TIMESTAMP
   ";
@@ -135,6 +136,7 @@ try {
     ':dmr_address'      => $data['Address'] ?: null,
     ':dmr_password'     => $data['Password'] ?: null,
     ':dmr_name'         => $data['Name'] ?: null,
+    ':bm_api_key'       => ($data['BmApiKey'] ?? '') ?: null,
   ]);
 
   $count = 0;

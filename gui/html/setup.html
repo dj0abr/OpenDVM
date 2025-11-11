@@ -321,6 +321,21 @@
           </div>
           <div class="field"></div>
         </div>
+        <!-- 
+        <div class="row">
+          <div class="field">
+            <label for="BmApiKey">BrandMeister API Key</label>
+            <div class="pw-inline">
+              <input id="BmApiKey" name="BmApiKey" type="password" class="mono" placeholder="paste API key" autocomplete="off" />
+              <button type="button" id="toggleBmKey" class="pw-toggle" aria-controls="BmApiKey" aria-pressed="false">
+                Show
+              </button>
+            </div>
+            <div class="hint">Bearer key from BrandMeister SelfCare → API Keys</div>
+          </div>
+          <div class="field"></div>
+        </div>
+         -->
       </section>
 
       <!-- TILE: ACTIONS -->
@@ -396,6 +411,20 @@
       // Beim Absenden: Passwort im Browser speichern
       form.addEventListener('submit', () => {
         try { localStorage.setItem(PW_KEY, pw.value); } catch(e) { /* ignore */ }
+      });
+    })();
+
+    // Show/Hide für BM API Key
+    (function(){
+      const btn = document.getElementById('toggleBmKey');
+      const inp = document.getElementById('BmApiKey');
+      if (!btn || !inp) return;
+      btn.addEventListener('click', () => {
+        const isPw = inp.type === 'password';
+        inp.type = isPw ? 'text' : 'password';
+        btn.textContent = isPw ? '🙈 Hide' : '👁️ Show';
+        btn.setAttribute('aria-pressed', String(isPw));
+        const v = inp.value; inp.value = ''; inp.value = v; // Cursor ans Ende
       });
     })();
 
@@ -647,6 +676,7 @@
         setVal('Address',       pick('Address'));
         setVal('Password',      pick('Password'));
         setVal('Name',          pick('Name'));
+        setVal('BmApiKey',      pick('BmApiKey'));  // setVal kann fehlende Elemente handeln
 
         // Nach dem Befüllen Default-Flags neu anwenden
         if (window.__updateFreqHint) window.__updateFreqHint();

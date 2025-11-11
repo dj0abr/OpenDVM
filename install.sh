@@ -17,6 +17,7 @@ log() { printf "[+] %s\n" "$*"; }
 warn() { printf "[!] %s\n" "$*" 1>&2; }
 die() { printf "[-] %s\n" "$*" 1>&2; exit 1; }
 
+BUILD_BASE="/opt/build"
 PAUSE=0
 DEBUG=0
 for arg in "$@"; do
@@ -74,9 +75,9 @@ calc_jobs() {
   fi
 
   if   (( mem_kb <= 1048576 )); then
-    echo 1
+    echo 2
   elif (( mem_kb <= 2097152 )); then
-    (( desired > 2 )) && echo 2 || echo "$desired"
+    (( desired > 3 )) && echo 3 || echo "$desired"
   else
     echo "$desired"
   fi
@@ -85,23 +86,31 @@ calc_jobs() {
 # Generic git clone + make build inside temp dir; optional install step
 build_from_git() {
   local repo="$1" make_dir="$2" make_path="$3" install_cmd="$4"
-  local tmp; tmp="$(mktemp -d)"
-  log "Cloning $repo into $tmp"
-  pushd "$tmp" >/dev/null
-  git clone --depth=1 "$repo"
 
-  jobs="$(calc_jobs "${JOBS_DESIRED:-$(nproc)}")"
-  echo "Building in $make_dir with -j${jobs}"
-  make -C "$make_dir" -j"$jobs" ${make_path:+-f "$make_path"}
+  install -d -m 755 "$BUILD_BASE"
+  local name; name="$(basename "$repo" .git)"
+  local repo_dir="$BUILD_BASE/$name"
 
-  #make -C "$make_dir" -j"$jobs" ${make_path:+-f "$make_path"}
+  if [[ -d "$repo_dir/.git" ]]; then
+    log "Updating $name in $repo_dir"
+    git -C "$repo_dir" fetch --depth=1 origin
+    git -C "$repo_dir" reset --hard FETCH_HEAD
+    git -C "$repo_dir" clean -fdx
+  else
+    log "Cloning $repo into $repo_dir"
+    git clone --depth=1 "$repo" "$repo_dir"
+  fi
+
+  local jobs; jobs="$(calc_jobs "${JOBS_DESIRED:-$(nproc)}")"
+  log "Building in $BUILD_BASE/$make_dir with -j${jobs}"
+  make -C "$BUILD_BASE/$make_dir" -j"$jobs" ${make_path:+-f "$make_path"}
+
   if [[ -n "$install_cmd" ]]; then
     log "Running install step"
-    eval "$install_cmd"
+    ( cd "$BUILD_BASE" && eval "$install_cmd" )
   fi
-  popd >/dev/null
-  rm -rf "$tmp" || true
 }
+
 apt_update_once() {
   if [[ ! -f /var/lib/apt/periodic/update-success-stamp ]] || \
      find /var/lib/apt/periodic/update-success-stamp -mmin +60 >/dev/null 2>&1; then
@@ -121,7 +130,7 @@ base_packages() {
     libasound2-dev libfftw3-dev libgps-dev \
     libwxgtk3.2-dev logrotate curl ca-certificates \
     libmariadb-dev libmariadb-dev-compat mariadb-server \
-    apache2 php libapache2-mod-php php-mysql wget
+    apache2 php libapache2-mod-php php-mysql wget php-curl
   apt-get autoremove -y || true
   apt-get clean || true
 }
@@ -230,7 +239,9 @@ install_hosts_and_tables() {
   fi
   log "Fetching DMRIds.dat and RSSI.dat..."
   wget -q -O /usr/local/etc/DMRIds.dat https://database.radioid.net/static/user.csv
-  wget -q -O /usr/local/etc/RSSI.dat https://raw.githubusercontent.com/g4klx/MMDVMHost/master/RSSI.dat
+  # install from file because G4KLX's RSSI.dat is just an empty sample
+  # wget -q -O /usr/local/etc/RSSI.dat https://raw.githubusercontent.com/g4klx/MMDVMHost/master/RSSI.dat
+  install_file "configs/RSSI.dat" "/usr/local/etc/RSSI.dat" 644
   chown mmdvm:mmdvm /usr/local/etc/*.dat || true
   log "Hosts & tables installed."
 }

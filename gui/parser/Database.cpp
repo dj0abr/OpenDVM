@@ -103,6 +103,7 @@ bool Database::createTableIfNeeded() noexcept {
         " location         VARCHAR(255)     NULL,"
         " description      VARCHAR(255)     NULL,"
         " url              VARCHAR(255)     NULL,"
+        " bm_api_key       TEXT             NULL,"
         " reflector1       VARCHAR(255)     NULL,"
         " ysf_suffix       VARCHAR(255)     NULL,"
         " ysf_startup      VARCHAR(255)     NULL,"
@@ -149,6 +150,7 @@ bool Database::ensureSingleRow() noexcept {
             "location=NULL,"
             "description=NULL,"
             "url=NULL,"
+            "bm_api_key='12345',"
             "reflector1=NULL,"
             "ysf_suffix=NULL,"
             "ysf_startup=NULL,"
@@ -193,6 +195,7 @@ bool Database::writeSiteData(const siteData& s) noexcept {
     q += "location='"          + esc(s.Location)    + "',";
     q += "description='"       + esc(s.Description) + "',";
     q += "url='"               + esc(s.URL)         + "',";
+    q += "bm_api_key='12345',";
     q += "reflector1='"        + esc(s.reflector1)  + "',";
     q += "ysf_suffix='"        + esc(s.Suffix)      + "',";
     q += "ysf_startup='"       + esc(s.Startup)     + "',";
