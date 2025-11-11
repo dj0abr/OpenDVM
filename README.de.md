@@ -1,5 +1,13 @@
 [🇬🇧 English](README.md) | [🇩🇪 Deutsch](README.de.md)
 
+**Aktuelle Version 1.0**
+
+getestet auf:
+- Debian basierende Distributionen (PC)
+- minimal Debian (nur Konsole)
+- Debian VM in Proxmox
+- Raspberry PI 3/A/B/+
+
 # 🛰️ OpenDVM Multimode Repeater/Station für Debian/Linux und MMDVM Boards
 
 Dieses Projekt basiert auf den **Digital Voice (DV) Modulen von G4KLX**, die zu einer kompletten Lösung wie **Pi-Star** kombiniert werden.  
