@@ -190,8 +190,6 @@ Wenn OpenDVM bereits installiert ist, ist ein Update in der Regel der beste Weg,
 Zuerst das aktuelle Repository von GitHub herunterladen:
 
 ```bash
-sudo apt update
-sudo apt install git -y
 git clone https://github.com/dj0abr/OpenDVM.git
 cd OpenDVM
 ```
