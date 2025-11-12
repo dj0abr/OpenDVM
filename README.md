@@ -8,6 +8,8 @@ tested on:
 - minimal Debian (console only)
 - Debian VM in Proxmox
 - Raspberry Pi 3/A/B/+
+- Raspberry Pi 4 should work, but currently not tested
+- Raspberry Pi 5 (supported, but not tested)
 
 # 🛰️ OpenDVM MultiMode Repeater/Station for Debian/Linux and MMDVM Boards
 
@@ -149,9 +151,17 @@ These scripts must be executed **in this order**.
 1. **for Raspberry PI with MMDVM HAT ONLY**
    - Skip this section if you **don’t use a Raspberry Pi** or if your MMDVM is connected **via USB**. In that case, go directly to **2. Install the serial port.**
    - If you **do** have a Raspberry Pi with an **MMDVM HAT mounted directly on the GPIO header**, you need to **enable the internal serial port**. 
-   Run the following command and reboot afterward:
+
+   Run the following command on a Raspberry 3 or 4 and reboot afterward:
    ```bash
-   sudo ./install_raspi.sh
+   sudo ./install_raspi34.sh
+   sudo reboot
+   ```
+   Run the following command on a Raspberry 5 and reboot afterward:
+
+   **Raspberry 5 ist currently UNTESTED**
+   ```bash
+   sudo ./install_raspi5.sh
    sudo reboot
    ```
    - After reboot continue with **2. Install the serial port**

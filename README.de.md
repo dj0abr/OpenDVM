@@ -6,7 +6,9 @@ getestet auf:
 - Debian basierende Distributionen (PC)
 - minimal Debian (nur Konsole)
 - Debian VM in Proxmox
-- Raspberry PI 3/A/B/+
+- Raspberry Pi 3/A/B/+
+- Raspberry Pi 4 sollte funktionieren, aktuell noch nicht geprüft
+- Raspberry Pi 5 (unterstützt, aber nicht geprüft)
 
 # 🛰️ OpenDVM Multimode Repeater/Station für Debian/Linux und MMDVM Boards
 
@@ -150,9 +152,18 @@ Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
 1. **NUR für Raspberry PI mit MMDVM HAT**
    - Überspringe diesen Abschnitt, wenn du **keinen Raspberry Pi** verwendest oder dein MMDVM **per USB** angeschlossen ist. In diesem Fall fahre direkt fort mit **2. Serielle Schnittstelle installieren**.
    - Wenn du einen **Raspberry Pi mit direkt aufgestecktem MMDVM HAT** besitzt, musst du die **interne serielle Schnittstelle aktivieren**.
-   Führe dazu folgendes Skript aus und starte anschließend neu:
+
+   Führe dazu folgendes Skript auf einem Raspberry 3 oder 4 aus und starte anschließend neu:
+   
    ```bash
-   sudo ./install_raspi.sh
+   sudo ./install_raspi34.sh
+   sudo reboot
+   ```
+   Führe folgendes Skript auf einem Raspberry 5 aus und starte anschließend neu:
+   
+   **Raspberry 5 ist noch NICHT GETESTET**
+   ```bash
+   sudo ./install_raspi5.sh
    sudo reboot
    ```
    - Nach dem Neustart fahre fort mit **2. Serielle Schnittstelle installieren**.
