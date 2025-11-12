@@ -1,6 +1,6 @@
 [🇬🇧 English](README.md) | [🇩🇪 Deutsch](README.de.md)
 
-**Aktuelle Version 1.0**
+**Aktuelle Version 1.1**
 
 getestet auf:
 - Debian basierende Distributionen (PC)

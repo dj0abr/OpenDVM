@@ -1,6 +1,6 @@
 [🇬🇧 English](README.md) | [🇩🇪 Deutsch](README.de.md)
 
-**Current Version 1.0**
+**Current Version 1.1**
 
 tested on:
 
