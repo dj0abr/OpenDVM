@@ -195,6 +195,8 @@ They must then be adjusted to match your setup – see [Configuration](#-Configu
 
 ## 🧰 Update
 
+Works with version 1.1 and higher
+
 If OpenDVM is already installed, performing an update is usually the best way to bring the system up to date. During an update, the configuration is **NOT** changed (unlike a fresh installation).
 
 First, download the latest repository from GitHub:

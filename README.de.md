@@ -196,6 +196,8 @@ Diese müssen anschließend an die eigene Umgebung angepasst werden – siehe [K
 
 ## 🧰 Update
 
+funktioniert ab Version 1.1
+
 Wenn OpenDVM bereits installiert ist, ist ein Update in der Regel der beste Weg, das System auf den neuesten Stand zu bringen. Während eines Updates wird die **Konfiguration NICHT verändert** (im Gegensatz zu einer Neuinstallation).
 
 Zuerst das aktuelle Repository von GitHub herunterladen:
