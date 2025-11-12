@@ -20,7 +20,7 @@ The current version supports **D-Star, DMR and YSF (C4FM) on MMDVM Boards** (USB
 
 It uses the following G4KLX repositories:
 
-- [MMDVMHost](https://github.com/g4klx/MMDVMHost)  
+- [MMDVMHost](https://github.com/dj0abr/MMDVMHost)  this is a modified version of the original MMDVMHost to support simplex D-Star operation
 - [ircDDBGateway](https://github.com/g4klx/ircDDBGateway)  
 - [DMRGateway](https://github.com/g4klx/DMRGateway)  
 - [YSFClient](https://github.com/g4klx/YSFClients) *(used as a gateway)*  

@@ -19,7 +19,7 @@ Die aktuelle Version unterstützt **D-Star, DMR und YSF (C4FM)** auf **MMDVM-Boa
 
 Folgende G4KLX-Repositories werden verwendet:
 
-- [MMDVMHost](https://github.com/g4klx/MMDVMHost)  
+- [MMDVMHost](https://github.com/dj0abr/MMDVMHost)  das ist eine modifizierte Version von MMDVMHost um D-Star Simplex Betrieb zu unterstützen
 - [ircDDBGateway](https://github.com/g4klx/ircDDBGateway)  
 - [DMRGateway](https://github.com/g4klx/DMRGateway)  
 - [YSFClient](https://github.com/g4klx/YSFClients) *(als Gateway genutzt)*  
