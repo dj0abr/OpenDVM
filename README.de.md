@@ -187,7 +187,16 @@ Diese müssen anschließend an die eigene Umgebung angepasst werden – siehe [K
 
 Wenn OpenDVM bereits installiert ist, ist ein Update in der Regel der beste Weg, das System auf den neuesten Stand zu bringen. Während eines Updates wird die **Konfiguration NICHT verändert** (im Gegensatz zu einer Neuinstallation).
 
-Führe dieses Skript aus:
+Zuerst das aktuelle Repository von GitHub herunterladen:
+
+```bash
+sudo apt update
+sudo apt install git -y
+git clone https://github.com/dj0abr/OpenDVM.git
+cd OpenDVM
+```
+
+dann führe dieses Skript aus:
 
 ```bash
 sudo ./install_update.sh
