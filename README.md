@@ -159,7 +159,7 @@ These scripts must be executed **in this order**.
    ```
    Run the following command on a Raspberry 5 and reboot afterward:
 
-   **Raspberry 5 ist currently UNTESTED**
+   **Raspberry 5 with MMDVM HAT on GPIO pins is currently UNTESTED (USB Board will work)**
    ```bash
    sudo ./install_raspi5.sh
    sudo reboot

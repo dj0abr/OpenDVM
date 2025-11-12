@@ -161,7 +161,7 @@ Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
    ```
    Führe folgendes Skript auf einem Raspberry 5 aus und starte anschließend neu:
    
-   **Raspberry 5 ist noch NICHT GETESTET**
+   **Raspberry 5 mit MMDVM Board auf den GPIO Pins aufgesteckt ist noch NICHT GETESTET (USB Board werden aber funktionieren)**
    ```bash
    sudo ./install_raspi5.sh
    sudo reboot
