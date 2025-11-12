@@ -149,7 +149,7 @@ Jetzt die Skripte (alle mit sudo) in folgender Reihenfolge ausführen:
 👉 **Wichtig:**  
 Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
 
-1. **NUR für Raspberry PI mit MMDVM HAT**
+1. 🧩 **NUR für Raspberry PI mit MMDVM HAT (NICHT für USB Boards)**
    - Überspringe diesen Abschnitt, wenn du **keinen Raspberry Pi** verwendest oder dein MMDVM **per USB** angeschlossen ist. In diesem Fall fahre direkt fort mit **2. Serielle Schnittstelle installieren**.
    - Wenn du einen **Raspberry Pi mit direkt aufgestecktem MMDVM HAT** besitzt, musst du die **interne serielle Schnittstelle aktivieren**.
 
@@ -168,7 +168,7 @@ Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
    ```
    - Nach dem Neustart fahre fort mit **2. Serielle Schnittstelle installieren**.
 
-2. **Serielle Schnittstelle installieren**  
+2. 🔌 **Serielle Schnittstelle installieren**  
    - Skript ausführen:
    ```bash
    sudo ./install_serial.sh
@@ -176,7 +176,7 @@ Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
    - Erkennt dein serielles Gerät (USB, Onboard-UART usw.), lässt dich das richtige auswählen  
    - Kann erneut ausgeführt werden, um ein anderes Gerät zu wählen (z. B. neue Hardware). In den meisten Fällen kann das angezeigte Default-Device einfach mit ENTER übernommen werden.
 
-3. **MMDVM-System und alle Gateways installieren**  
+3. ⚙️ **MMDVM-System und alle Gateways installieren**  
    ```bash
    sudo ./install.sh
    ```

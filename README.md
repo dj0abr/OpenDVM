@@ -148,7 +148,7 @@ Now run the scripts (all with sudo) as follows:
 👉 **Important:**  
 These scripts must be executed **in this order**.
 
-1. **for Raspberry PI with MMDVM HAT ONLY**
+1. 🧩 **for Raspberry PI with MMDVM HAT ONLY (not for USB boards)**
    - Skip this section if you **don’t use a Raspberry Pi** or if your MMDVM is connected **via USB**. In that case, go directly to **2. Install the serial port.**
    - If you **do** have a Raspberry Pi with an **MMDVM HAT mounted directly on the GPIO header**, you need to **enable the internal serial port**. 
 
@@ -159,14 +159,14 @@ These scripts must be executed **in this order**.
    ```
    Run the following command on a Raspberry 5 and reboot afterward:
 
-   **Raspberry 5 with MMDVM HAT on GPIO pins is currently UNTESTED (USB Board will work)**
+   **Raspberry 5 with MMDVM HAT on GPIO pins is currently UNTESTED (USB Boards will work)**
    ```bash
    sudo ./install_raspi5.sh
    sudo reboot
    ```
    - After reboot continue with **2. Install the serial port**
 
-2. **Install the serial port**  
+2. 🔌 **Install the serial port**  
    - Run the script:
    ```bash
    sudo ./install_serial.sh
@@ -174,7 +174,7 @@ These scripts must be executed **in this order**.
    - Detects your serial device (USB, onboard UART, etc.), lets you pick the correct one
    - re-run this script to switch to a different device (e.g. a new hardware). In most cases, the shown default device is correct and can be used as is.
 
-3. **Install the MMDVM System and all Gateways**  
+3. ⚙️ **Install the MMDVM System and all Gateways**  
    - Run the script:
    ```bash
    sudo ./install.sh
