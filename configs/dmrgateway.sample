@@ -64,7 +64,7 @@ Debug=0
 Location=1
 Name=BM_2621_Germany
 TGRewrite0=2,9,2,9,1
-PCRewrite0=2,94000,2,4000,100 im Block [Inmfo]
+PCRewrite0=2,94000,2,4000
 TypeRewrite0=2,9990,2,9990
 SrcRewrite0=2,4000,2,9,1001
 
