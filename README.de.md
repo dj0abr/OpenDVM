@@ -39,10 +39,11 @@ Das Projekt wurde ursprünglich für das MMDVM Repeater Builder Board des DB0SL-
 2. [Architektur](#-architektur)  
 3. [Backend – Log-Monitor & Datenbank](#-backend--log-monitor--datenbank)  
 4. [Installation & Abhängigkeiten](#-installation--abhängigkeiten)  
-5. [Konfiguration](#-konfiguration)  
-6. [Web-Frontend](#-web-frontend)  
-7. [Systemeinrichtung & Wartung](#-systemeinrichtung--wartung)  
-8. [Danksagung & Lizenz](#-danksagung--lizenz)
+5. [Update](#-Update)
+6. [Konfiguration](#-konfiguration)  
+7. [Web-Frontend](#-web-frontend)  
+8. [Systemeinrichtung & Wartung](#-systemeinrichtung--wartung)  
+9. [Danksagung & Lizenz](#-danksagung--lizenz)
 
 ---
 
@@ -181,6 +182,21 @@ Nach Abschluss werden **Standardkonfigurationsdateien** automatisch nach `/etc` 
 Diese müssen anschließend an die eigene Umgebung angepasst werden – siehe [Konfiguration](#-konfiguration).
 
 ---
+
+## 🧰 Update
+
+Wenn OpenDVM bereits installiert ist, ist ein Update in der Regel der beste Weg, das System auf den neuesten Stand zu bringen. Während eines Updates wird die **Konfiguration NICHT verändert** (im Gegensatz zu einer Neuinstallation).
+
+Führe dieses Skript aus:
+
+```bash
+sudo ./install_update.sh
+```
+
+- installiert die neuesten DJ0ABR-Erweiterungen und die Benutzeroberfläche  
+- lässt die G4KLX-Module unverändert  
+- behält deine bestehende Konfiguration bei  
+- kein Neustart erforderlich — das System ist direkt nach dem Update einsatzbereit. Einfach die Seite im Browser neu laden (Taste F5
 
 ## 🧾 Konfiguration
 

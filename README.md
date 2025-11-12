@@ -40,10 +40,11 @@ This project was originally developed for the MMDVM Repeater Builder board used 
 2. [Architecture](#-architecture)  
 3. [Backend – Log Monitor & Database](#-backend--log-monitor--database)  
 4. [Installation & Dependencies](#-installation--dependencies)  
-5. [Configuration](#-configuration)  
-6. [Web Frontend](#-web-frontend)  
-7. [System Setup & Maintenance](#-system-setup--maintenance)  
-8. [Credits & License](#-credits--license)
+5. [Update](#-Update)
+6. [Configuration](#-configuration)  
+7. [Web Frontend](#-web-frontend)  
+8. [System Setup & Maintenance](#-system-setup--maintenance)  
+9. [Credits & License](#-credits--license)
 
 ---
 
@@ -179,6 +180,22 @@ These scripts must be executed **in this order**.
 
 After completion, **default configuration files** are automatically copied to `/etc`.  
 They must then be adjusted to match your setup – see [Configuration](#-Configuration).
+
+---
+
+## 🧰 Update
+
+If OpenDVM is already installed, performing an update is usually the best way to bring the system up to date. During an update, the configuration is **NOT** changed (unlike a fresh installation).
+
+Run this script:
+
+   ```bash
+   sudo ./install_update.sh
+   ```
+   - installs the latest DJ0ABR extensions and user interface
+   - keeps the G4KLX modules unchanged
+   - preserves your existing configuration
+   - no reboot required — the system is ready for use immediately after the update. Just reload the page in your browser (Key F5)
 
 ---
 
