@@ -7,8 +7,8 @@ getestet auf:
 - minimal Debian (nur Konsole)
 - Debian VM in Proxmox
 - Raspberry Pi 3/A/B/+
-- Raspberry Pi 4 sollte funktionieren, aktuell noch nicht geprüft
-- Raspberry Pi 5 (unterstützt, aber nicht geprüft)
+- Raspberry Pi 4
+- Raspberry Pi 5
 
 # 🛰️ OpenDVM Multimode Repeater/Station für Debian/Linux und MMDVM Boards
 
@@ -161,7 +161,7 @@ Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
    ```
    Führe folgendes Skript auf einem Raspberry 5 aus und starte anschließend neu:
    
-   **Raspberry 5 mit MMDVM Board auf den GPIO Pins aufgesteckt ist noch NICHT GETESTET (USB Board werden aber funktionieren)**
+   **NUR für Raspberry PI 5 mit MMDVM HAT (NICHT für USB Boards)**
    ```bash
    sudo ./install_raspi5.sh
    sudo reboot
