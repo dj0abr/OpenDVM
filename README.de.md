@@ -3,9 +3,14 @@
 **Aktuelle Version 1.1**
 
 getestet auf:
+
+MMDVM-USB Boards:
 - Debian basierende Distributionen (PC)
 - minimal Debian (nur Konsole)
 - Debian VM in Proxmox
+
+MMDVM-GPIO Boards & MMDVM-USB Boards:
+- Raspberry Pi Zero 2W
 - Raspberry Pi 3/A/B/+
 - Raspberry Pi 4
 - Raspberry Pi 5
@@ -153,7 +158,7 @@ Diese Skripte müssen **in dieser Reihenfolge** ausgeführt werden.
    - Überspringe diesen Abschnitt, wenn du **keinen Raspberry Pi** verwendest oder dein MMDVM **per USB** angeschlossen ist. In diesem Fall fahre direkt fort mit **2. Serielle Schnittstelle installieren**.
    - Wenn du einen **Raspberry Pi mit direkt aufgestecktem MMDVM HAT** besitzt, musst du die **interne serielle Schnittstelle aktivieren**.
 
-   Führe dazu folgendes Skript auf einem Raspberry 3 oder 4 aus und starte anschließend neu:
+   Führe dazu folgendes Skript auf einem Raspberry Zero2W, 3 oder 4 aus und starte anschließend neu:
    
    ```bash
    sudo ./install_raspi34.sh

@@ -1,9 +1,9 @@
 CXX := g++
 CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -pedantic -MMD -MP
 LDFLAGS :=
-LDLIBS := -lmysqlclient
+LDLIBS := -lmysqlclient -lmosquitto -lpthread
 
-SRC := main.cpp renderConfigFile.cpp helper.cpp handleDVconfig.cpp Database.cpp
+SRC := main.cpp renderConfigFile.cpp helper.cpp handleDVconfig.cpp Database.cpp MqttListener.cpp fmdatabase.cpp
 OBJ := $(SRC:.cpp=.o)
 DEP := $(OBJ:.o=.d)
 

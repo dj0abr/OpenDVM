@@ -1,7 +1,18 @@
 #include <thread>
 #include <chrono>
+#include <csignal>
+#include <atomic>
 #include "handleDVconfig.h"
 #include "Database.h"
+#include "MqttListener.h"
+
+static std::atomic<bool> g_running{true};
+
+void sigHandler(int)
+{
+    g_running = false;
+    MqttListener::stop();
+}
 
 int main(){
     // Nach dem Programmstart fülle die Datenbank einmalig
@@ -10,8 +21,14 @@ int main(){
     Database db;
     db.writeSiteData(dv.site); // push to DB (id=1)
 
-    // jetzt mache eine Loop um Änderungen des GUIs auszuführen
-    while(true) {
+    // Starte FM Funknetz Abfragen als Thread
+    MqttListener::init();
+    std::signal(SIGINT,  sigHandler);
+    std::signal(SIGTERM, sigHandler);
+    MqttListener::start();
+
+    // führe DV Logfile Parsing in dieser Loop aus
+    while(g_running) {
         bool newdata = db.readSiteData(dv.site);
         if(newdata) {
             // handle data

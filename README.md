@@ -4,9 +4,13 @@
 
 tested on:
 
+MMDVM-USB Boards:
 - Debian-based distributions (PC)
 - minimal Debian (console only)
 - Debian VM in Proxmox
+
+MMDVM-GPIO Boards & MMDVM-USB Boards:
+- Raspberry Pi Zero 2W
 - Raspberry Pi 3/A/B/+
 - Raspberry Pi 4
 - Raspberry Pi 5
@@ -152,7 +156,7 @@ These scripts must be executed **in this order**.
    - Skip this section if you **don’t use a Raspberry Pi** or if your MMDVM is connected **via USB**. In that case, go directly to **2. Install the serial port.**
    - If you **do** have a Raspberry Pi with an **MMDVM HAT mounted directly on the GPIO header**, you need to **enable the internal serial port**. 
 
-   Run the following command on a Raspberry 3 or 4 and reboot afterward:
+   Run the following command on a Raspberry Zero2W, 3 or 4 and reboot afterward:
    ```bash
    sudo ./install_raspi34.sh
    sudo reboot
