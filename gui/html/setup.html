@@ -296,6 +296,18 @@
           </div>
           <div class="field"></div>
         </div>
+        <!-- Control-Buttons -->
+        <div class="row">
+          <div class="field">
+            <label>YSF Control</label>
+            <div class="actions-right">
+              <button type="button" id="ysfDisconnectBtn">DISCONNECT</button>
+              <button type="button" id="ysfConnectBtn" class="primary">CONNECT</button>
+            </div>
+            <div class="hint">Disconnects, or connects to Default YSF Reflector</div>
+          </div>
+          <div class="field"></div>
+        </div>
       </section>
 
       <!-- TILE: DMR -->
@@ -648,6 +660,62 @@
             const s = String(v).replace('.', ',');
             setVal(key, s);
         };
+
+        // === YSF CONNECT/DISCONNECT Buttons ===
+        (function ysfControl() {
+          const btnDisc  = document.getElementById('ysfDisconnectBtn');
+          const btnConn  = document.getElementById('ysfConnectBtn');
+          const startup  = document.getElementById('Startup');
+          const cfgPwInp = document.getElementById('ConfigPassword');
+
+          if (!btnDisc || !btnConn || !startup || !cfgPwInp) return;
+
+          async function sendYsfCommand(cmd) {
+            const cfgPw = cfgPwInp.value.trim();
+            if (!cfgPw) {
+              showSnack('Config Password benötigt für YSF-Steuerung', false);
+              return;
+            }
+
+            const params = new URLSearchParams();
+            params.set('cmd', cmd);
+            params.set('ConfigPassword', cfgPw);
+
+            if (cmd === 'connect') {
+              const refl = startup.value.trim();
+              if (!refl) {
+                showSnack('Kein YSF Reflector im Feld "Startup" gesetzt', false);
+                return;
+              }
+              params.set('reflector', refl);
+            }
+
+            try {
+              const r = await fetch('ysf_command.php', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params.toString()
+              });
+
+              const data = await r.json().catch(() => null);
+
+              if (r.ok && data && data.ok) {
+                const reflText = cmd === 'connect' ? (' ' + (startup.value.trim() || '')) : '';
+                showSnack(`YSF ${cmd.toUpperCase()} command sent${reflText}`, true);
+              } else {
+                const err = data && data.error ? data.error : (r.status + ' ' + r.statusText);
+                showSnack('YSF command failed: ' + err);
+              }
+            } catch (e) {
+              showSnack('Network error: ' + e);
+            }
+          }
+
+          btnDisc.addEventListener('click', () => sendYsfCommand('disconnect'));
+          btnConn.addEventListener('click', () => sendYsfCommand('connect'));
+        })();
 
         // Kernfelder
         setVal('Callsign',      pick('Callsign'));

@@ -1155,10 +1155,10 @@
         const modes = ["dstar", "dmr", "fusion"];
         for (const m of modes) {
           const el = document.getElementById("refl-" + m);
-          const val = d[m] || "nicht verbunden";
+          const val = d[m] || "not linked";
           el.textContent = val;
           el.classList.remove("refl-active", "refl-inactive");
-          if (val.toLowerCase() === "nicht verbunden" || val === "-----") {
+          if (val.toLowerCase() === "not linked" || val === "-----") {
             el.classList.add("refl-inactive");
           } else {
             el.classList.add("refl-active");

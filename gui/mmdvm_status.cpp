@@ -454,6 +454,24 @@ public:
             }
         }
 
+        // Disconnect-Meldungen als Info erzeugen
+        if (line.find("Disconnect by remote command") != std::string::npos ||
+            line.find("Closing YSF network connection") != std::string::npos) {
+
+            ParsedResult res;
+            res.originalLine = line;
+            res.mode = "YSF";
+            res.startEnd = "Info";
+            res.source = "-";
+            res.callsign = "";
+            res.dgId = std::nullopt;
+            res.durationSec = std::nullopt;
+            res.berPct = std::nullopt;
+            // Marker, den wir später in handleParsed auswerten
+            res.info = std::string("DISCONNECTED");
+            return res;
+        }
+
         // 3) DMR: "<ServerName>, Logged into the master successfully"
         {
             std::smatch m;
@@ -980,8 +998,17 @@ void insertLastHeard(const std::string& callsign,
         else if (r.startEnd == "Info" && r.info.has_value()) {
             const std::string& msg = *r.info;
             if (r.mode == "YSF") {
-                // "Linked to <name>"
-                setReflectorFusion(stripPrefix(msg, "Linked to "));
+                // Disconnect -> Reflector leeren
+                if (msg == "DISCONNECTED" ||
+                    msg.find("Disconnect by remote command") != std::string::npos ||
+                    msg.find("Closing YSF network connection") != std::string::npos)
+                {
+                    // leerer String = „nicht verbunden“
+                    setReflectorFusion("");
+                } else {
+                    // "Linked to <name>"
+                    setReflectorFusion(stripPrefix(msg, "Linked to "));
+                }
             } else if (r.mode == "D-Star") {
                 // Slow data "Verlinkt zu <name>" oder beliebiger Text -> speichere voll
                 setReflectorDStar(stripPrefix(msg, "Verlinkt zu "));
